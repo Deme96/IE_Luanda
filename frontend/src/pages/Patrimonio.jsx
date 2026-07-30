@@ -4,7 +4,7 @@ export default function Patrimonio() {
   const columns = [
     { key: "nome", label: "Nome" },
     { key: "categoria", label: "Categoria" },
-    { key: "valor_estimado", label: "Valor Estimado (Kz)", render: (val) => `Kz ${Number(val || 0).toLocaleString()}` },
+    { key: "valor_estimado", label: "Valor Estimado (XOF)", render: (val) => `XOF ${Number(val || 0).toLocaleString()}` },
     { key: "estado", label: "Estado" },
   ];
 
@@ -24,7 +24,7 @@ export default function Patrimonio() {
         { label: "Outro", value: "Outro" },
       ],
     },
-    { name: "valor_estimado", label: "Valor Estimado (Kz)", required: true },
+    { name: "valor_estimado", label: "Valor Estimado (XOF)", required: true },
     { name: "data_aquisicao", label: "Data de Aquisição", type: "date" },
     {
       name: "estado",

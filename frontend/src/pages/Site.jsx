@@ -218,8 +218,8 @@ export default function Site() {
                       <h3 style={{ fontSize: "1.1rem", fontWeight: 700, color: "#111827", marginBottom: 8 }}>{proj.nome}</h3>
                       <p style={{ color: "#6b7280", fontSize: "0.875rem", lineHeight: 1.6, marginBottom: 20 }}>{proj.descricao || "Projeto de missão em andamento."}</p>
                       <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.8rem", color: "#6b7280", marginBottom: 8 }}>
-                        <span>Arrecadado: <strong style={{ color: "#111827" }}>R$ {Number(proj.valor_arrecadado || 0).toFixed(2)}</strong></span>
-                        <span>Meta: <strong style={{ color: "#111827" }}>R$ {Number(proj.orcamento || 0).toFixed(2)}</strong></span>
+                        <span>Arrecadado: <strong style={{ color: "#111827" }}>XOF {Number(proj.valor_arrecadado || 0).toFixed(2)}</strong></span>
+                        <span>Meta: <strong style={{ color: "#111827" }}>XOF {Number(proj.orcamento || 0).toFixed(2)}</strong></span>
                       </div>
                       <div style={{ height: 6, background: "#f3f4f6", borderRadius: 999 }}>
                         <div style={{ height: 6, borderRadius: 999, background: "hsl(142, 60%, 25%)", width: `${progress}%`, transition: "width 0.6s ease" }} />

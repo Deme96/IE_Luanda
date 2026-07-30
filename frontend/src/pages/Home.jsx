@@ -79,7 +79,7 @@ export default function Home() {
           <p className="font-bold mb-2 text-gray-800">{label}</p>
           {payload.map(p => (
             <p key={p.dataKey} style={{ color: p.fill }} className="text-sm font-medium">
-              {p.name}: R$ {p.value}
+              {p.name}: XOF {p.value}
             </p>
           ))}
         </div>
@@ -94,10 +94,10 @@ export default function Home() {
       
       {/* Financeiro */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <StatCard title="Dízimos (Mês)" value={`R$ ${stats.dizimos.toFixed(2)}`} icon={HandCoins} color="text-emerald-600" bg="bg-emerald-100" />
-        <StatCard title="Ofertas (Mês)" value={`R$ ${stats.ofertas.toFixed(2)}`} icon={HeartHandshake} color="text-blue-600" bg="bg-blue-100" />
-        <StatCard title="Encargos (Mês)" value={`R$ ${stats.encargos.toFixed(2)}`} icon={Banknote} color="text-rose-600" bg="bg-rose-100" />
-        <StatCard title="Saldo em Caixa" value={`R$ ${(stats.dizimos + stats.ofertas - stats.encargos).toFixed(2)}`} icon={Banknote} color="text-gray-800" bg="bg-gray-100" />
+        <StatCard title="Dízimos (Mês)" value={`XOF ${stats.dizimos.toFixed(2)}`} icon={HandCoins} color="text-emerald-600" bg="bg-emerald-100" />
+        <StatCard title="Ofertas (Mês)" value={`XOF ${stats.ofertas.toFixed(2)}`} icon={HeartHandshake} color="text-blue-600" bg="bg-blue-100" />
+        <StatCard title="Encargos (Mês)" value={`XOF ${stats.encargos.toFixed(2)}`} icon={Banknote} color="text-rose-600" bg="bg-rose-100" />
+        <StatCard title="Saldo em Caixa" value={`XOF ${(stats.dizimos + stats.ofertas - stats.encargos).toFixed(2)}`} icon={Banknote} color="text-gray-800" bg="bg-gray-100" />
       </div>
 
       {/* Organizacional */}

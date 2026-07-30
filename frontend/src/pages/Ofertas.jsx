@@ -3,12 +3,12 @@ import EntityCrudPage from "@/components/EntityCrudPage";
 export default function Ofertas() {
   const columns = [
     { key: "tipo", label: "Tipo" },
-    { key: "valor", label: "Valor", render: (val) => `R$ ${Number(val || 0).toFixed(2)}` },
+    { key: "valor", label: "Valor", render: (val) => `XOF ${Number(val || 0).toFixed(2)}` },
     { key: "data", label: "Data" },
   ];
 
   const fields = [
-    { name: "valor", label: "Valor (R$)", type: "number", required: true },
+    { name: "valor", label: "Valor (XOF)", type: "number", required: true },
     { name: "data", label: "Data", type: "date", required: true },
     {
       name: "tipo",
@@ -28,9 +28,8 @@ export default function Ofertas() {
       type: "select",
       options: [
         { label: "Dinheiro", value: "dinheiro" },
-        { label: "PIX", value: "pix" },
-        { label: "Cartão", value: "cartao" },
-        { label: "Transferência", value: "transferencia" },
+        { label: "Orange Money", value: "orange_money" },
+        { label: "Transferência Bancária", value: "transferencia" },
       ],
     },
   ];
