@@ -1,4 +1,5 @@
 import SiteNavbar from "@/components/site/SiteNavbar";
+import { useTranslation } from "react-i18next";
 import { useEffect, useState } from "react";
 import { base44 } from "@/base44";
 import { Link } from "react-router-dom";
@@ -20,6 +21,7 @@ export default function Site() {
   const [projetos, setProjetos] = useState([]);
   const [igrejas, setIgrejas] = useState([]);
   const [proximaNoticia, setProximaNoticia] = useState(null);
+  const { t } = useTranslation();
 
   useEffect(() => {
     async function loadData() {
@@ -75,12 +77,12 @@ export default function Site() {
           <h1
             style={{ fontSize: "clamp(2.5rem, 6vw, 5rem)", fontWeight: 900, lineHeight: 1.1, letterSpacing: "-0.02em", marginBottom: 24 }}
           >
-            Igreja Evangélica<br />
-            <span style={{ color: "#bbf7d0" }}>De Luanda</span>
+            {t("site_hero_title").split(" ").slice(0, -1).join(" ")}<br />
+            <span style={{ color: "#bbf7d0" }}>{t("site_hero_title").split(" ").slice(-1)[0]}</span>
           </h1>
 
           <p style={{ fontSize: "1.2rem", color: "rgba(255,255,255,0.75)", maxWidth: 560, margin: "0 auto 40px", lineHeight: 1.7 }}>
-            "Pregamos... a Cristo Jesus como Senhor, e nós mesmos Somos vossos servos por amor de Jesus" (2 Cor. 4:5).
+            {t("site_hero_subtitle")}
           </p>
 
           <div style={{ display: "flex", justifyContent: "center", gap: 16, flexWrap: "wrap" }}>
@@ -88,13 +90,13 @@ export default function Site() {
               href="#cultos"
               style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "rgba(255,255,255,0.15)", border: "1px solid rgba(255,255,255,0.3)", color: "white", padding: "14px 28px", borderRadius: 8, fontWeight: 600, textDecoration: "none", transition: "all 0.2s", fontSize: "0.95rem" }}
             >
-              Nossos Cultos <ChevronRight size={18} />
+              {t("site_hero_schedule")} <ChevronRight size={18} />
             </a>
             <a
-              href="#cultos"
+              href="#contato"
               style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "hsl(142, 60%, 25%)", color: "white", padding: "14px 28px", borderRadius: 8, fontWeight: 700, textDecoration: "none", transition: "all 0.2s", fontSize: "0.95rem", border: "none" }}
             >
-              Fale Conosco
+              {t("site_contact")}
             </a>
           </div>
         </div>

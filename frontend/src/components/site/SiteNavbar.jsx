@@ -1,11 +1,14 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { LogIn, Menu, X } from "lucide-react";
+import { useTranslation } from "react-i18next";
+import { LogIn, Menu, X, Globe } from "lucide-react";
 
 export default function SiteNavbar() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  const { t, i18n } = useTranslation();
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
@@ -19,11 +22,11 @@ export default function SiteNavbar() {
   }, []);
 
   const links = [
-    { label: "Sobre", href: "#sobre" },
-    { label: "Cultos", href: "#cultos" },
-    { label: "Projetos", href: "#projetos" },
-    { label: "Igrejas", href: "#igrejas" },
-    { label: "Contato", href: "#contato" },
+    { label: t("site_about"), href: "#sobre" },
+    { label: t("site_services"), href: "#cultos" },
+    { label: t("site_projects"), href: "#projetos" },
+    { label: t("site_churches"), href: "#igrejas" },
+    { label: t("site_contact"), href: "#contato" },
   ];
 
   return (
@@ -96,8 +99,32 @@ export default function SiteNavbar() {
             onMouseLeave={e => e.currentTarget.style.transform = "scale(1)"}
           >
             <LogIn size={16} />
-            {!isMobile && "Acesso Restrito"}
+            {!isMobile && t("site_restricted_access")}
           </Link>
+
+          {/* Language Selector */}
+          <div style={{ position: "relative", display: "flex", alignItems: "center", background: "rgba(255,255,255,0.1)", borderRadius: 6, padding: "4px 8px" }}>
+            <Globe size={16} color="white" style={{ marginRight: 6 }} />
+            <select
+              value={i18n.language}
+              onChange={(e) => i18n.changeLanguage(e.target.value)}
+              style={{
+                background: "transparent",
+                color: "white",
+                border: "none",
+                outline: "none",
+                fontSize: "0.85rem",
+                fontWeight: 600,
+                cursor: "pointer",
+                appearance: "none",
+                paddingRight: 8
+              }}
+            >
+              <option value="pt" style={{ color: "black" }}>PT</option>
+              <option value="en" style={{ color: "black" }}>EN</option>
+              <option value="fr" style={{ color: "black" }}>FR</option>
+            </select>
+          </div>
 
           {/* Mobile hamburger */}
           {isMobile && (

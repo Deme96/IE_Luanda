@@ -11,6 +11,18 @@ const resources = {
       "login_button": "Entrar",
       "create_account": "Criar conta",
       "back_to_site": "Voltar ao site",
+      
+      "site_about": "Sobre",
+      "site_services": "Cultos",
+      "site_projects": "Projetos",
+      "site_churches": "Igrejas",
+      "site_contact": "Contato",
+      "site_restricted_access": "Acesso Restrito",
+      
+      "site_hero_title": "Igreja Evangélica de Luanda",
+      "site_hero_subtitle": "Um lugar de fé, esperança e comunhão. Venha fazer parte da nossa família.",
+      "site_hero_schedule": "Ver Horários",
+      
       "policy_title": "Política de Bom Uso",
       "policy_default": "Bem-vindo ao sistema de Gestão Eclesiástica. Este sistema é destinado ao uso exclusivo de membros e líderes autorizados. O uso indevido das informações aqui contidas está sujeito a penalidades éticas e legais. Ao fazer login, você concorda em manter a confidencialidade dos dados.",
       
@@ -44,6 +56,18 @@ const resources = {
       "login_button": "Sign In",
       "create_account": "Create account",
       "back_to_site": "Back to site",
+      
+      "site_about": "About",
+      "site_services": "Services",
+      "site_projects": "Projects",
+      "site_churches": "Churches",
+      "site_contact": "Contact",
+      "site_restricted_access": "Restricted Access",
+      
+      "site_hero_title": "Evangelical Church of Luanda",
+      "site_hero_subtitle": "A place of faith, hope, and communion. Come join our family.",
+      "site_hero_schedule": "View Schedule",
+      
       "policy_title": "Good Use Policy",
       "policy_default": "Welcome to the Ecclesiastical Management system. This system is intended for the exclusive use of authorized members and leaders. Misuse of the information contained herein is subject to ethical and legal penalties. By logging in, you agree to maintain data confidentiality.",
       
@@ -77,6 +101,18 @@ const resources = {
       "login_button": "Se connecter",
       "create_account": "Créer un compte",
       "back_to_site": "Retour au site",
+      
+      "site_about": "À propos",
+      "site_services": "Services",
+      "site_projects": "Projets",
+      "site_churches": "Églises",
+      "site_contact": "Contact",
+      "site_restricted_access": "Accès Restreint",
+      
+      "site_hero_title": "Église Évangélique de Luanda",
+      "site_hero_subtitle": "Un lieu de foi, d'espérance et de communion. Venez rejoindre notre famille.",
+      "site_hero_schedule": "Voir l'horaire",
+      
       "policy_title": "Politique de Bon Usage",
       "policy_default": "Bienvenue dans le système de gestion ecclésiastique. Ce système est destiné à l'usage exclusif des membres et dirigeants autorisés. La mauvaise utilisation des informations contenues ici est sujette à des sanctions éthiques et légales. En vous connectant, vous acceptez de maintenir la confidentialité des données.",
       
