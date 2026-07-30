@@ -5,7 +5,7 @@ import { base44 } from "@/base44";
 import { Link } from "react-router-dom";
 import {
   MapPin, Phone, Mail, Clock, CheckCircle, ChevronRight,
-  BookOpen, Heart, Users, ArrowRight, Pickaxe, Bell
+  BookOpen, Heart, Users, ArrowRight, Pickaxe, Bell, Newspaper
 } from "lucide-react";
 
 const CULTOS = [
@@ -20,7 +20,7 @@ const CULTOS = [
 export default function Site() {
   const [projetos, setProjetos] = useState([]);
   const [igrejas, setIgrejas] = useState([]);
-  const [proximaNoticia, setProximaNoticia] = useState(null);
+  const [noticias, setNoticias] = useState([]);
   const { t } = useTranslation();
 
   useEffect(() => {
@@ -30,7 +30,7 @@ export default function Site() {
       const n = await base44.db.get("Noticias");
       setProjetos(p.filter(proj => proj.status === "em_andamento"));
       setIgrejas(i.filter(ig => ig.status === "ativa"));
-      if (n && n.length > 0) setProximaNoticia(n[0]);
+      setNoticias(n || []);
     }
     loadData();
   }, []);
@@ -38,19 +38,6 @@ export default function Site() {
   return (
     <div className="min-h-screen bg-white flex flex-col" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
       <SiteNavbar />
-
-      {/* ═══════════════ ALERTAS / EVENTOS ═══════════════ */}
-      {proximaNoticia && (
-        <div style={{ background: "hsl(44, 78%, 52%)", padding: "12px 24px", display: "flex", justifyContent: "center", alignItems: "center", gap: 12 }}>
-          <Bell size={18} color="#111" />
-          <span style={{ fontWeight: 700, color: "#111", fontSize: "0.95rem" }}>
-            Aviso Importante:
-          </span>
-          <span style={{ color: "#222", fontSize: "0.95rem" }}>
-            {proximaNoticia.titulo} ({proximaNoticia.data}) - {proximaNoticia.descricao}
-          </span>
-        </div>
-      )}
 
       {/* ═══════════════ HERO ═══════════════ */}
       <section
@@ -191,8 +178,36 @@ export default function Site() {
         </div>
       </section>
 
+      {/* ═══════════════ NOTÍCIAS ═══════════════ */}
+      {noticias.length > 0 && (
+        <section id="noticias" style={{ padding: "96px 24px", background: "#f9fafb" }}>
+          <div className="max-w-5xl mx-auto">
+            <div style={{ textAlign: "center", marginBottom: 64 }}>
+              <div style={{ display: "inline-block", background: "hsl(142, 60%, 25%, 0.15)", color: "hsl(142, 60%, 25%)", borderRadius: 999, padding: "4px 16px", fontSize: 13, fontWeight: 600, marginBottom: 16 }}>{t("site_news").toUpperCase()}</div>
+              <h2 style={{ fontSize: "2.5rem", fontWeight: 800, color: "#111827", lineHeight: 1.2 }}>Fique por Dentro</h2>
+              <p style={{ color: "#6b7280", marginTop: 12 }}>Avisos, eventos e novidades da nossa congregação.</p>
+            </div>
+            
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: 24 }}>
+              {noticias.map(n => (
+                <div key={n.id} style={{ background: "white", borderRadius: 16, border: "1px solid #e5e7eb", overflow: "hidden", display: "flex", flexDirection: "column" }}>
+                  <div style={{ padding: 24, flex: 1 }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8, color: "hsl(142, 60%, 25%)", fontWeight: 600, fontSize: "0.85rem", marginBottom: 12 }}>
+                      <Newspaper size={16} />
+                      {n.data}
+                    </div>
+                    <h3 style={{ fontSize: "1.2rem", fontWeight: 700, color: "#111827", marginBottom: 12 }}>{n.titulo}</h3>
+                    <p style={{ color: "#4b5563", fontSize: "0.95rem", lineHeight: 1.6 }}>{n.descricao}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* ═══════════════ PROJETOS ═══════════════ */}
-      <section id="projetos" style={{ padding: "96px 24px", background: "white" }}>
+      <section id="projetos" style={{ padding: "96px 24px", background: noticias.length > 0 ? "white" : "#f9fafb" }}>
         <div className="max-w-5xl mx-auto">
           <div style={{ textAlign: "center", marginBottom: 64 }}>
             <div style={{ display: "inline-block", background: "hsl(142, 60%, 25%, 0.15)", color: "hsl(142, 60%, 25%)", borderRadius: 999, padding: "4px 16px", fontSize: 13, fontWeight: 600, marginBottom: 16 }}>MISSÕES</div>
@@ -346,9 +361,9 @@ export default function Site() {
           <div>
             <div style={{ color: "white", fontWeight: 700, fontSize: "0.9rem", marginBottom: 16 }}>Navegação</div>
             <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-              {["#sobre", "#cultos", "#projetos", "#contato"].map(href => (
+              {["#sobre", "#cultos", "#projetos", "#noticias", "#contato"].map(href => (
                 <a key={href} href={href} style={{ color: "rgba(255,255,255,0.65)", textDecoration: "none", fontSize: "0.875rem", textTransform: "capitalize" }}>
-                  {href.replace("#", "").charAt(0).toUpperCase() + href.replace("#", "").slice(1)}
+                  {href.replace("#", "")}
                 </a>
               ))}
             </div>
