@@ -9,6 +9,17 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 
+// Rota raiz de boas-vindas / status da API
+app.get('/', (req, res) => {
+  res.json({
+    message: 'API de Gestão Eclesiástica I.E.G.B. está online e ativa!',
+    endpoints: {
+      health: '/api/health',
+      membros: '/api/membros'
+    }
+  });
+});
+
 // Rota de Health Check
 app.get('/api/health', async (req, res) => {
   try {

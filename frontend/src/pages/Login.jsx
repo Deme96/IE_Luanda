@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
 import { ShieldCheck, ArrowLeft, Globe } from "lucide-react";
+import ThemeToggle from "@/components/ThemeToggle";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -86,7 +87,8 @@ export default function Login() {
       <div className="flex w-full lg:w-1/2 flex-col justify-center items-center p-8 lg:p-16 relative">
         
         {/* Seletor de Idioma no topo direito */}
-        <div className="absolute top-6 right-8 flex items-center gap-2 text-sm text-gray-500">
+        <div className="absolute top-6 right-8 flex items-center gap-3 text-sm text-gray-500">
+          <ThemeToggle />
           <Globe className="h-4 w-4" />
           <button onClick={() => changeLanguage('pt')} className={`hover:text-military ${i18n.language === 'pt' ? 'font-bold text-military' : ''}`}>PT</button> |
           <button onClick={() => changeLanguage('en')} className={`hover:text-military ${i18n.language === 'en' ? 'font-bold text-military' : ''}`}>EN</button> |

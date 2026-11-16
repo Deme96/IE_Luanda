@@ -35,5 +35,5 @@ export default function Lideres() {
     },
   ];
 
-  return <EntityCrudPage title="Líderes" entityName="Lider" columns={columns} fields={fields} />;
+  return <EntityCrudPage title="Líderes" entityName="Lider" columns={columns} fields={fields} permissionKeys={{ view: "conselho.visualizar", create: "conselho.gerenciar", edit: "conselho.gerenciar", delete: "conselho.excluir" }} />;
 }

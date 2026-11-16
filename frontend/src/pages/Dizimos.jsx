@@ -26,5 +26,5 @@ export default function Dizimos() {
     { name: "observacao", label: "Observação" },
   ];
 
-  return <EntityCrudPage title="Dízimos" entityName="Dizimo" columns={columns} fields={fields} />;
+  return <EntityCrudPage title="Dízimos" entityName="Dizimo" columns={columns} fields={fields} permissionKeys={{ view: "entradas.visualizar", create: "entradas.dizimos", edit: "entradas.editar", delete: "entradas.cancelar" }} />;
 }

@@ -41,5 +41,5 @@ export default function DirecaoRestrita() {
     { name: "observacoes", label: "Observações" },
   ];
 
-  return <EntityCrudPage title="Direção Restrita" entityName="DirecaoRestrita" columns={columns} fields={fields} />;
+  return <EntityCrudPage title="Direção Restrita" entityName="DirecaoRestrita" columns={columns} fields={fields} permissionKeys={{ view: "conselho.direcao_restrita", create: "conselho.direcao_restrita", edit: "conselho.direcao_restrita", delete: "conselho.direcao_restrita" }} />;
 }

@@ -4,7 +4,9 @@ export default function Patrimonio() {
   const columns = [
     { key: "nome", label: "Nome" },
     { key: "categoria", label: "Categoria" },
+    { key: "modalidade", label: "Modalidade" },
     { key: "valor_estimado", label: "Valor Estimado (XOF)", render: (val) => `XOF ${Number(val || 0).toLocaleString()}` },
+    { key: "periodo_vida", label: "Vida Útil (meses)", render: (val) => val ? `${val} meses` : "-" },
     { key: "estado", label: "Estado" },
   ];
 
@@ -24,7 +26,18 @@ export default function Patrimonio() {
         { label: "Outro", value: "Outro" },
       ],
     },
-    { name: "valor_estimado", label: "Valor Estimado (XOF)", required: true },
+    {
+      name: "modalidade",
+      label: "Modalidade",
+      type: "select",
+      required: true,
+      options: [
+        { label: "Ativo", value: "Ativo" },
+        { label: "Passivo", value: "Passivo" },
+      ],
+    },
+    { name: "valor_estimado", label: "Valor Estimado (XOF)", type: "number", required: true },
+    { name: "periodo_vida", label: "Vida Útil (meses)", type: "number" },
     { name: "data_aquisicao", label: "Data de Aquisição", type: "date" },
     {
       name: "estado",
@@ -41,5 +54,5 @@ export default function Patrimonio() {
     { name: "descricao", label: "Descrição / Observações" },
   ];
 
-  return <EntityCrudPage title="Patrimônio" entityName="Patrimonio" columns={columns} fields={fields} />;
+  return <EntityCrudPage title="Patrimônio" entityName="Patrimonio" columns={columns} fields={fields} permissionKeys={{ view: "patrimonio.visualizar", create: "patrimonio.gerenciar", edit: "patrimonio.gerenciar", delete: "patrimonio.excluir" }} />;
 }

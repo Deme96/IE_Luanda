@@ -3,8 +3,11 @@ import { base44 } from "@/base44";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip, Legend, LineChart, Line } from "recharts";
 import { TrendingUp, Users, BookOpen, Church, Heart, GraduationCap, Gem } from "lucide-react";
+import { usePermissions } from "@/lib/usePermissions";
 
 export default function Estatisticas() {
+  const { can, ready: permissionsReady } = usePermissions();
+  const canView = permissionsReady && can("estatisticas.visualizar");
   const [data, setData] = useState([]);
   const [totals, setTotals] = useState({
     convertidos: 0,
@@ -55,6 +58,12 @@ export default function Estatisticas() {
   return (
     <div className="space-y-8">
       <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight">Estatísticas da Igreja</h1>
+
+      {!permissionsReady ? (
+        <p className="text-center text-gray-500">Verificando privilégios...</p>
+      ) : !canView ? (
+        <p className="rounded-xl border bg-white p-8 text-center text-gray-500">Você não possui privilégio para visualizar estes relatórios.</p>
+      ) : <>
 
       {/* Indicadores Rápidos */}
       <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
@@ -160,6 +169,7 @@ export default function Estatisticas() {
           </CardContent>
         </Card>
       </div>
+      </>}
     </div>
   );
 }

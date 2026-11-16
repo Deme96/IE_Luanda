@@ -20,7 +20,7 @@ const resources = {
       "site_contact": "Contato",
       "site_restricted_access": "Acesso Restrito",
       
-      "site_hero_title": "Igreja Evangélica de Luanda",
+      "site_hero_title": "Igreja Evangélica da Guiné-Bissau",
       "site_hero_subtitle": "Um lugar de fé, esperança e comunhão. Venha fazer parte da nossa família.",
       "site_hero_schedule": "Ver Horários",
       
@@ -33,12 +33,16 @@ const resources = {
       "menu_council": "Conselho",
       "menu_tithes": "Dízimos",
       "menu_offerings": "Ofertas",
+      "menu_entries": "Entradas",
       "menu_charges": "Encargos",
       "menu_documents": "Documentos",
       "menu_projects": "Projetos",
       "menu_churches": "Igrejas",
+      "menu_branches": "Filiais",
       "menu_settings": "Configurações",
       "menu_finances": "Finanças",
+      "menu_presbytery_council": "Conselho de Presbitério",
+      "menu_secretary": "Secretaria",
       "menu_leadership": "Direção",
       "menu_human_resources": "Recursos Humanos",
       "menu_departments": "Departamentos",
@@ -57,7 +61,7 @@ const resources = {
       "login_button": "Sign In",
       "create_account": "Create account",
       "back_to_site": "Back to site",
-      
+
       "site_about": "About",
       "site_services": "Services",
       "site_projects": "Projects",
@@ -65,26 +69,29 @@ const resources = {
       "site_churches": "Churches",
       "site_contact": "Contact",
       "site_restricted_access": "Restricted Access",
-      
-      "site_hero_title": "Evangelical Church of Luanda",
+
+      "site_hero_title": "Evangelical Church of Guinea-Bissau",
       "site_hero_subtitle": "A place of faith, hope, and communion. Come join our family.",
       "site_hero_schedule": "View Schedule",
-      
+
       "policy_title": "Good Use Policy",
       "policy_default": "Welcome to the Ecclesiastical Management system. This system is intended for the exclusive use of authorized members and leaders. Misuse of the information contained herein is subject to ethical and legal penalties. By logging in, you agree to maintain data confidentiality.",
-      
+
       "menu_dashboard": "Dashboard",
       "menu_members": "Members",
       "menu_leaders": "Leaders",
       "menu_council": "Council",
       "menu_tithes": "Tithes",
       "menu_offerings": "Offerings",
+      "menu_entries": "Entries",
       "menu_charges": "Charges",
       "menu_documents": "Documents",
       "menu_projects": "Projects",
       "menu_churches": "Churches",
       "menu_settings": "Settings",
       "menu_finances": "Finances",
+      "menu_presbytery_council": "Presbytery Council",
+      "menu_secretary": "Secretary",
       "menu_leadership": "Leadership",
       "menu_human_resources": "Human Resources",
       "menu_departments": "Departments",
@@ -103,7 +110,7 @@ const resources = {
       "login_button": "Se connecter",
       "create_account": "Créer un compte",
       "back_to_site": "Retour au site",
-      
+
       "site_about": "À propos",
       "site_services": "Services",
       "site_projects": "Projets",
@@ -111,26 +118,29 @@ const resources = {
       "site_churches": "Églises",
       "site_contact": "Contact",
       "site_restricted_access": "Accès Restreint",
-      
-      "site_hero_title": "Église Évangélique de Luanda",
+
+      "site_hero_title": "Église Évangélique de Guinée-Bissau",
       "site_hero_subtitle": "Un lieu de foi, d'espérance et de communion. Venez rejoindre notre famille.",
       "site_hero_schedule": "Voir l'horaire",
-      
+
       "policy_title": "Politique de Bon Usage",
       "policy_default": "Bienvenue dans le système de gestion ecclésiastique. Ce système est destiné à l'usage exclusif des membres et dirigeants autorisés. La mauvaise utilisation des informations contenues ici est sujette à des sanctions éthiques et légales. En vous connectant, vous acceptez de maintenir la confidentialité des données.",
-      
+
       "menu_dashboard": "Tableau de Bord",
       "menu_members": "Membres",
       "menu_leaders": "Dirigeants",
       "menu_council": "Conseil",
       "menu_tithes": "Dîmes",
       "menu_offerings": "Offrandes",
-      "menu_charges": "Frais",
+      "menu_entries": "Entrées",
+      "menu_charges": "Charges",
       "menu_documents": "Documents",
       "menu_projects": "Projets",
       "menu_churches": "Églises",
       "menu_settings": "Paramètres",
       "menu_finances": "Finances",
+      "menu_presbytery_council": "Conseil présbytéral",
+      "menu_secretary": "Secrétariat",
       "menu_leadership": "Direction",
       "menu_human_resources": "Ressources Humaines",
       "menu_departments": "Départements",

@@ -54,5 +54,5 @@ export default function Encargos() {
     },
   ];
 
-  return <EntityCrudPage title="Encargos" entityName="Encargo" columns={columns} fields={fields} />;
+  return <EntityCrudPage title="Encargos" entityName="Encargo" columns={columns} fields={fields} permissionKeys={{ view: "encargos.visualizar", create: "encargos.cadastrar", edit: ["encargos.editar", "encargos.status"], delete: "encargos.excluir" }} editFieldPermissions={{ descricao: "encargos.editar", valor: "encargos.editar", data: "encargos.editar", categoria: "encargos.editar", fornecedor: "encargos.editar", status: ["encargos.editar", "encargos.status"] }} />;
 }

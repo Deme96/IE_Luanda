@@ -34,5 +34,5 @@ export default function Ofertas() {
     },
   ];
 
-  return <EntityCrudPage title="Ofertas" entityName="Oferta" columns={columns} fields={fields} />;
+  return <EntityCrudPage title="Ofertas" entityName="Oferta" columns={columns} fields={fields} permissionKeys={{ view: "entradas.visualizar", create: "entradas.ofertas", edit: "entradas.editar", delete: "entradas.cancelar" }} />;
 }

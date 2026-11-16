@@ -42,5 +42,5 @@ export default function Projetos() {
     },
   ];
 
-  return <EntityCrudPage title="Projetos Missionários" entityName="Projeto" columns={columns} fields={fields} />;
+  return <EntityCrudPage title="Projetos Missionários" entityName="Projeto" columns={columns} fields={fields} permissionKeys={{ view: "projetos.visualizar", create: "projetos.gerenciar", edit: "projetos.gerenciar", delete: "projetos.excluir" }} />;
 }

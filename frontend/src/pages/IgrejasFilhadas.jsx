@@ -36,5 +36,5 @@ export default function IgrejasFilhadas() {
     },
   ];
 
-  return <EntityCrudPage title="Igrejas Filiadas" entityName="IgrejaFilhada" columns={columns} fields={fields} />;
+  return <EntityCrudPage title="Igrejas Filiadas" entityName="IgrejaFilhada" columns={columns} fields={fields} permissionKeys={{ view: "igrejas.visualizar", create: "igrejas.gerenciar", edit: "igrejas.gerenciar", delete: "igrejas.excluir" }} />;
 }

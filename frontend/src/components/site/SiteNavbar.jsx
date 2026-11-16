@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { LogIn, Menu, X, Globe, Bell } from "lucide-react";
 import { base44 } from "@/base44";
+import ThemeToggle from "@/components/ThemeToggle";
 
 export default function SiteNavbar() {
   const [scrolled, setScrolled] = useState(false);
@@ -10,6 +11,7 @@ export default function SiteNavbar() {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [noticia, setNoticia] = useState(null);
   const [showNoticia, setShowNoticia] = useState(false);
+  const [isNoticiaUnread, setIsNoticiaUnread] = useState(false);
   const { t, i18n } = useTranslation();
 
   useEffect(() => {
@@ -26,12 +28,36 @@ export default function SiteNavbar() {
   useEffect(() => {
     async function loadNoticia() {
       const n = await base44.db.get("Noticias");
-      if (n && n.length > 0) setNoticia(n[0]);
+      const latestNoticia = n?.[0];
+      if (!latestNoticia) return;
+      if (localStorage.getItem(`site_viewed_notification_${latestNoticia.id}`) === "true") return;
+      setNoticia(latestNoticia);
+      setIsNoticiaUnread(true);
     }
     loadNoticia();
   }, []);
 
+  const toggleNoticia = () => {
+    if (showNoticia) {
+      setShowNoticia(false);
+      setNoticia(null);
+      return;
+    }
+
+    if (noticia?.id != null) {
+      localStorage.setItem(`site_viewed_notification_${noticia.id}`, "true");
+    }
+    setIsNoticiaUnread(false);
+    setShowNoticia(true);
+  };
+
+  const dismissNoticia = () => {
+    setShowNoticia(false);
+    setNoticia(null);
+  };
+
   const links = [
+    { label: "Vídeos", href: "#videos" },
     { label: t("site_about"), href: "#sobre" },
     { label: t("site_services"), href: "#cultos" },
     { label: t("site_projects"), href: "#projetos" },
@@ -42,6 +68,7 @@ export default function SiteNavbar() {
 
   return (
     <nav
+      className="site-navbar"
       style={{
         position: "sticky",
         top: 0,
@@ -68,7 +95,7 @@ export default function SiteNavbar() {
           href="#inicio"
           style={{ fontWeight: 800, fontSize: "1.15rem", color: "white", textDecoration: "none", display: "flex", alignItems: "center", gap: 8 }}
         >
-          🏛️ <span>I.E.L</span>
+          🏛️ <span>I.E.G.B</span>
         </a>
 
         {/* Desktop links */}
@@ -90,6 +117,7 @@ export default function SiteNavbar() {
 
         {/* Right side */}
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <ThemeToggle className="border-white/30 text-white hover:bg-white/10" />
           <Link
             to="/login"
             style={{
@@ -114,53 +142,63 @@ export default function SiteNavbar() {
           </Link>
 
           {/* Notifications */}
-          {noticia && (
-            <div style={{ position: "relative" }}>
-              <button
-                onClick={() => setShowNoticia(!showNoticia)}
-                style={{
-                  background: "rgba(255,255,255,0.1)",
-                  border: "none",
-                  color: "white",
-                  padding: 8,
-                  borderRadius: "50%",
-                  cursor: "pointer",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  position: "relative"
-                }}
-              >
-                <Bell size={18} />
-                <span style={{ position: "absolute", top: 0, right: 0, width: 8, height: 8, background: "#ef4444", borderRadius: "50%" }}></span>
-              </button>
+          <div style={{ position: "relative" }}>
+            <button
+              onClick={noticia ? toggleNoticia : undefined}
+              aria-label={!noticia ? "Sem notificações" : showNoticia ? "Fechar notificação" : "Visualizar notificação"}
+              style={{
+                background: "rgba(255,255,255,0.1)",
+                border: "none",
+                color: "white",
+                padding: 8,
+                borderRadius: "50%",
+                cursor: noticia ? "pointer" : "default",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                position: "relative"
+              }}
+            >
+              <Bell size={18} />
+              {isNoticiaUnread && (
+                <span style={{ position: "absolute", top: 0, right: 0, width: 8, height: 8, background: "#ef4444", borderRadius: "50%" }} />
+              )}
+            </button>
 
-              {showNoticia && (
-                <div style={{
-                  position: "absolute",
-                  top: "100%",
-                  right: 0,
-                  marginTop: 8,
-                  width: 300,
-                  background: "white",
-                  borderRadius: 8,
-                  boxShadow: "0 10px 25px rgba(0,0,0,0.2)",
-                  padding: 16,
-                  zIndex: 100
-                }}>
+            {showNoticia && noticia && (
+              <div style={{
+                position: "absolute",
+                top: "100%",
+                right: 0,
+                marginTop: 8,
+                width: 300,
+                background: "white",
+                borderRadius: 8,
+                boxShadow: "0 10px 25px rgba(0,0,0,0.2)",
+                padding: 16,
+                zIndex: 100
+              }}>
+                <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 8 }}>
                   <div style={{ fontWeight: 700, color: "#111827", marginBottom: 8, fontSize: "0.95rem" }}>
                     Aviso Importante: {noticia.titulo}
                   </div>
-                  <div style={{ color: "#4b5563", fontSize: "0.85rem", marginBottom: 8 }}>
-                    {noticia.descricao}
-                  </div>
-                  <div style={{ color: "hsl(142, 60%, 25%)", fontSize: "0.75rem", fontWeight: 600 }}>
-                    Data: {noticia.data}
-                  </div>
+                  <button
+                    onClick={dismissNoticia}
+                    aria-label="Dispensar notificação"
+                    style={{ background: "transparent", border: "none", color: "#6b7280", cursor: "pointer", padding: 2, lineHeight: 0 }}
+                  >
+                    <X size={16} />
+                  </button>
                 </div>
-              )}
-            </div>
-          )}
+                <div style={{ color: "#4b5563", fontSize: "0.85rem", marginBottom: 8 }}>
+                  {noticia.descricao}
+                </div>
+                <div style={{ color: "hsl(142, 60%, 25%)", fontSize: "0.75rem", fontWeight: 600 }}>
+                  Data: {noticia.data}
+                </div>
+              </div>
+            )}
+          </div>
 
           {/* Language Selector */}
           <div style={{ position: "relative", display: "flex", alignItems: "center", background: "rgba(255,255,255,0.1)", borderRadius: 6, padding: "4px 8px" }}>

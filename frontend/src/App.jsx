@@ -16,12 +16,12 @@ import Home from "./pages/Home";
 import Membros from "./pages/Membros";
 import Lideres from "./pages/Lideres";
 import Conselho from "./pages/Conselho";
-import Dizimos from "./pages/Dizimos";
-import Ofertas from "./pages/Ofertas";
+import Entradas from "./pages/Entradas";
 import Encargos from "./pages/Encargos";
-import Documentos from "./pages/Documentos";
+import Secretaria from "./pages/Secretaria";
 import Projetos from "./pages/Projetos";
 import IgrejasFilhadas from "./pages/IgrejasFilhadas";
+import Filiais from "./pages/Filiais";
 import Configuracoes from "./pages/Configuracoes";
 import Patrimonio from "./pages/Patrimonio";
 import Departamentos from "./pages/Departamentos";
@@ -45,12 +45,12 @@ function App() {
               <Route path="/admin/membros" element={<Membros />} />
               <Route path="/admin/lideres" element={<Lideres />} />
               <Route path="/admin/conselho" element={<Conselho />} />
-              <Route path="/admin/dizimos" element={<Dizimos />} />
-              <Route path="/admin/ofertas" element={<Ofertas />} />
+              <Route path="/admin/secretaria" element={<Secretaria />} />
+              <Route path="/admin/entradas" element={<Entradas />} />
               <Route path="/admin/encargos" element={<Encargos />} />
-              <Route path="/admin/documentos" element={<Documentos />} />
               <Route path="/admin/projetos" element={<Projetos />} />
               <Route path="/admin/igrejas" element={<IgrejasFilhadas />} />
+              <Route path="/admin/filiais" element={<Filiais />} />
               <Route path="/admin/configuracoes" element={<Configuracoes />} />
               <Route path="/admin/patrimonio" element={<Patrimonio />} />
               <Route path="/admin/departamentos" element={<Departamentos />} />

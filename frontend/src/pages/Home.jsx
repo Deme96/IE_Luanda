@@ -3,8 +3,13 @@ import { base44 } from "@/base44";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip, PieChart, Pie, Cell, Legend } from "recharts";
 import { Users, Crown, Pickaxe, Map, HandCoins, Banknote, HeartHandshake, Bell, CalendarClock } from "lucide-react";
+import { usePermissions } from "@/lib/usePermissions";
 
 export default function Home() {
+  const { can, ready: permissionsReady } = usePermissions();
+  const canSeeIndicators = permissionsReady && can("dashboard.indicadores");
+  const canSeeCharts = permissionsReady && can("dashboard.graficos");
+  const canSeeEvents = permissionsReady && can("dashboard.eventos");
   const [stats, setStats] = useState({
     membros: 0,
     lideres: 0,
@@ -19,6 +24,7 @@ export default function Home() {
   const [pieData, setPieData] = useState([]);
   const [cultos, setCultos] = useState([]);
   const [noticias, setNoticias] = useState([]);
+  const [upcomingEvents, setUpcomingEvents] = useState([]);
 
   useEffect(() => {
     async function loadStats() {
@@ -32,8 +38,39 @@ export default function Home() {
       
       const cultosData = await base44.db.get("Cultos");
       const noticiasData = await base44.db.get("Noticias");
+      const reunioes = await base44.db.get("Reuniao");
+      const escalaCulto = await base44.db.get("EscalaCulto");
       setCultos(cultosData.slice(0, 3));
       setNoticias(noticiasData.slice(0, 3));
+
+      const allEvents = [
+        ...reunioes.map(item => ({
+          type: "Reunião",
+          title: item.assunto,
+          date: item.data,
+          time: item.hora,
+          details: item.local,
+          description: item.descricao,
+        })),
+        ...escalaCulto.map(item => ({
+          type: "Escala de Culto",
+          title: item.equipe,
+          date: item.data,
+          time: item.hora,
+          details: item.observacao,
+          description: item.observacao,
+        })),
+      ];
+
+      const today = new Date();
+      const upcoming = allEvents
+        .filter((event) => {
+          const eventDate = new Date(`${event.date}T${event.time || "00:00"}`);
+          const diffDays = Math.ceil((eventDate - today) / (1000 * 60 * 60 * 24));
+          return diffDays >= 0 && diffDays <= 7;
+        })
+        .sort((a, b) => new Date(`${a.date}T${a.time || "00:00"}`) - new Date(`${b.date}T${b.time || "00:00"}`));
+      setUpcomingEvents(upcoming);
 
       const totalDizimos = dizimos.reduce((acc, curr) => acc + Number(curr.valor), 0);
       const totalOfertas = ofertas.reduce((acc, curr) => acc + Number(curr.valor), 0);
@@ -93,24 +130,24 @@ export default function Home() {
       <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight">Visão Geral</h1>
       
       {/* Financeiro */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+      {canSeeCharts && <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <StatCard title="Dízimos (Mês)" value={`XOF ${stats.dizimos.toFixed(2)}`} icon={HandCoins} color="text-emerald-600" bg="bg-emerald-100" />
         <StatCard title="Ofertas (Mês)" value={`XOF ${stats.ofertas.toFixed(2)}`} icon={HeartHandshake} color="text-blue-600" bg="bg-blue-100" />
         <StatCard title="Encargos (Mês)" value={`XOF ${stats.encargos.toFixed(2)}`} icon={Banknote} color="text-rose-600" bg="bg-rose-100" />
         <StatCard title="Saldo em Caixa" value={`XOF ${(stats.dizimos + stats.ofertas - stats.encargos).toFixed(2)}`} icon={Banknote} color="text-gray-800" bg="bg-gray-100" />
-      </div>
+      </div>}
 
       {/* Organizacional */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+      {canSeeIndicators && <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <StatCard title="Membros" value={stats.membros} icon={Users} color="text-military" bg="bg-military/10" />
         <StatCard title="Líderes Ativos" value={stats.lideres} icon={Crown} color="text-military" bg="bg-military/10" />
         <StatCard title="Projetos Ativos" value={stats.projetos} icon={Pickaxe} color="text-military" bg="bg-military/10" />
         <StatCard title="Igrejas Filiadas" value={stats.igrejas} icon={Map} color="text-military" bg="bg-military/10" />
-      </div>
+      </div>}
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      {(canSeeCharts || (canSeeEvents && upcomingEvents.length > 0)) && <div className="grid grid-cols-1 md:grid-cols-4 gap-6 items-stretch">
         {/* Gráfico de Barras Modernizado */}
-        <Card className="col-span-1 md:col-span-2 shadow-sm border-gray-100 overflow-hidden">
+        {canSeeCharts && <Card className="col-span-1 md:col-span-2 shadow-sm border-gray-100 overflow-hidden">
           <CardHeader className="bg-gray-50/50 border-b border-gray-100 pb-4">
             <CardTitle className="text-lg font-bold text-gray-800">Movimentação Financeira</CardTitle>
             <CardDescription>Resumo dos últimos 6 meses</CardDescription>
@@ -128,10 +165,10 @@ export default function Home() {
               </BarChart>
             </ResponsiveContainer>
           </CardContent>
-        </Card>
+        </Card>}
 
         {/* Gráfico Donut Modernizado */}
-        <Card className="col-span-1 shadow-sm border-gray-100 overflow-hidden">
+        {canSeeCharts && <Card className="col-span-1 shadow-sm border-gray-100 overflow-hidden">
           <CardHeader className="bg-gray-50/50 border-b border-gray-100 pb-4">
             <CardTitle className="text-lg font-bold text-gray-800">Status de Encargos</CardTitle>
             <CardDescription>Distribuição de pagamentos</CardDescription>
@@ -170,11 +207,37 @@ export default function Home() {
               ))}
             </div>
           </CardContent>
-        </Card>
-      </div>
+        </Card>}
+
+        {/* Alertas compactos ao lado dos gráficos */}
+        {canSeeEvents && upcomingEvents.length > 0 && (
+          <Card className="col-span-1 shadow-sm border-rose-100 overflow-hidden">
+            <CardHeader className="bg-rose-50 border-b border-rose-100 px-4 py-3">
+              <div className="flex items-center gap-2">
+                <Bell className="h-4 w-4 text-rose-600 shrink-0" />
+                <div className="min-w-0">
+                  <CardTitle className="text-sm font-bold text-rose-900">Alertas de Cultos</CardTitle>
+                  <CardDescription className="text-xs text-rose-700">Próximos 7 dias · {upcomingEvents.length}</CardDescription>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="max-h-[320px] overflow-y-auto p-3">
+              <div className="space-y-2">
+                {upcomingEvents.slice(0, 5).map((event, index) => (
+                  <div key={`${event.type}-${index}`} className="rounded-lg border border-rose-100 bg-white p-2.5">
+                    <p className="text-[10px] font-bold uppercase tracking-wide text-rose-600">{event.type}</p>
+                    <p className="mt-0.5 text-xs font-semibold leading-snug text-gray-900">{event.title}</p>
+                    <p className="mt-1 text-[11px] text-gray-500">{event.date} às {event.time || "—"}</p>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+      </div>}
 
       {/* Seção de Eventos e Atividades */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
+      {canSeeEvents && <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
         
         {/* Cultos */}
         <Card className="shadow-sm border-gray-100 overflow-hidden">
@@ -230,7 +293,7 @@ export default function Home() {
           </CardContent>
         </Card>
 
-      </div>
+      </div>}
     </div>
   );
 }
