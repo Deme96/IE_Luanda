@@ -12,6 +12,21 @@ const allowedOrigins = (process.env.CORS_ORIGIN || '')
   .split(',')
   .map((origin) => origin.trim())
   .filter(Boolean);
+const ADMIN_EMAILS = ['admin@iel.com', 'admin@iel.org', 'admin@iegb.org'];
+const ADMIN_PERMISSIONS = [
+  'dashboard',
+  'estatisticas',
+  'membros',
+  'departamentos',
+  'conselho',
+  'secretaria',
+  'entradas',
+  'encargos',
+  'patrimonio',
+  'projetos',
+  'igrejas',
+  'configuracoes'
+];
 
 const COLLECTIONS = {
   Membro: { permission: 'membros', read: 'membros.visualizar', create: 'membros.cadastrar', update: 'membros.editar', delete: 'membros.excluir' },
@@ -185,7 +200,9 @@ function safeUserRecord(user) {
 }
 
 function canonicalLoginEmails(email) {
-  if (email === 'admin@iel.com') return [email, 'admin@iel.org', 'admin@iegb.org'];
+  if (ADMIN_EMAILS.includes(email)) {
+    return [email, ...ADMIN_EMAILS.filter((adminEmail) => adminEmail !== email)];
+  }
   return [email];
 }
 
@@ -226,7 +243,11 @@ app.post('/api/auth/login', async (req, res, next) => {
 
     const emails = canonicalLoginEmails(email);
     const result = await db.query(
-      'SELECT id, nome, email, password_hash, cargo, role, status, permissoes FROM usuarios WHERE lower(email) = ANY($1::text[]) ORDER BY id LIMIT 1',
+      `SELECT id, nome, email, password_hash, cargo, role, status, permissoes
+       FROM usuarios
+       WHERE lower(email) = ANY($1::text[])
+       ORDER BY array_position($1::text[], lower(email)), id
+       LIMIT 1`,
       [emails]
     );
     const user = result.rows[0];
@@ -622,6 +643,29 @@ async function start() {
   if (isProduction && !jwtSecret) {
     throw new Error('Defina JWT_SECRET nas variáveis de ambiente do Render antes de iniciar a API.');
   }
+  await db.query(`
+    ALTER TABLE usuarios
+      ADD COLUMN IF NOT EXISTS nome VARCHAR(255),
+      ADD COLUMN IF NOT EXISTS cargo VARCHAR(100),
+      ADD COLUMN IF NOT EXISTS role VARCHAR(50) DEFAULT 'personalizado',
+      ADD COLUMN IF NOT EXISTS status VARCHAR(20) DEFAULT 'ativo',
+      ADD COLUMN IF NOT EXISTS permissoes JSONB DEFAULT '["dashboard"]'::jsonb,
+      ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  `);
+  await db.query(`
+    UPDATE usuarios
+    SET nome = COALESCE(NULLIF(BTRIM(nome), ''), split_part(email, '@', 1)),
+        role = COALESCE(NULLIF(role, ''), 'personalizado'),
+        status = COALESCE(NULLIF(status, ''), 'ativo'),
+        permissoes = COALESCE(permissoes, '["dashboard"]'::jsonb),
+        updated_at = COALESCE(updated_at, NOW())
+  `);
+  await db.query(
+    `UPDATE usuarios SET role = 'admin', permissoes = $1::jsonb
+     WHERE lower(email) = ANY($2::text[])`,
+    [JSON.stringify(ADMIN_PERMISSIONS), ADMIN_EMAILS]
+  );
+  await db.query('ALTER TABLE usuarios ALTER COLUMN nome SET NOT NULL');
   await db.query(`
     CREATE TABLE IF NOT EXISTS app_records (
       collection VARCHAR(80) NOT NULL,

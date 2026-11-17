@@ -21,6 +21,24 @@ CREATE TABLE IF NOT EXISTS usuarios (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Compatibilidade com bancos criados por versões anteriores do esquema.
+ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS nome VARCHAR(255);
+ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS cargo VARCHAR(100);
+ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS role VARCHAR(50) DEFAULT 'personalizado';
+ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS status VARCHAR(20) DEFAULT 'ativo';
+ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS permissoes JSONB DEFAULT '["dashboard"]'::jsonb;
+ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP;
+UPDATE usuarios
+SET nome = COALESCE(NULLIF(BTRIM(nome), ''), split_part(email, '@', 1)),
+    role = COALESCE(NULLIF(role, ''), 'personalizado'),
+    status = COALESCE(NULLIF(status, ''), 'ativo'),
+    permissoes = COALESCE(permissoes, '["dashboard"]'::jsonb),
+    updated_at = COALESCE(updated_at, NOW());
+UPDATE usuarios
+SET role = 'admin',
+    permissoes = '["dashboard","estatisticas","membros","departamentos","conselho","secretaria","entradas","encargos","patrimonio","projetos","igrejas","configuracoes"]'::jsonb
+WHERE lower(email) IN ('admin@iel.com', 'admin@iel.org', 'admin@iegb.org');
+
 -- 2.1 DADOS COMPARTILHADOS DO FRONTEND E CONFLITOS DE MIGRAÇÃO
 CREATE TABLE IF NOT EXISTS app_records (
     collection VARCHAR(80) NOT NULL,

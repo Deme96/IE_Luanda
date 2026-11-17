@@ -30,7 +30,7 @@
 4. Na aba **Environment Variables**, adicione:
    - `NODE_ENV` = production
    - `PORT` = 10000
-   - `DATABASE_URL` = (Cole a Internal Database URL do passo 1)
+   - `DATABASE_URL` = cole a **Internal Database URL completa** do PostgreSQL Render (não use endereço de exemplo)
    - `CORS_ORIGIN` = https://seu-frontend.vercel.app (o link do site na Vercel)
    - `JWT_SECRET` = uma chave aleatória forte e privada
 5. Clique em **Deploy Web Service**.
@@ -53,6 +53,7 @@
 ## 4. Sincronização entre aparelhos
 - O frontend usa `VITE_API_URL` no momento do build; o deploy do frontend precisa dessa variável apontando para a API Render.
 - A API usa o PostgreSQL Render como fonte compartilhada. As tabelas `app_records` e `app_sync_conflicts` são criadas automaticamente ao iniciar o serviço.
+- A API completa colunas faltantes na tabela `usuarios` de bancos antigos. A conta administrativa precisa existir; em um banco novo, execute `database/render_schema_completo.sql` para criar a conta inicial.
 - Depois do deploy do frontend e da API, entre com uma conta administradora em cada aparelho para importar os dados locais. O servidor mantém os registros que já existem; diferenças com o mesmo identificador são guardadas em `app_sync_conflicts` e mostradas após o login.
 - Não apague os dados do navegador antes da migração. Faça e guarde backups dos aparelhos que contêm dados; os registros locais distintos devem ser importados com uma conta que tenha permissão de backup.
 - O login inicial depende de um usuário já existente na tabela `usuarios`. Troque qualquer senha padrão logo após o primeiro login e configure `JWT_SECRET` no Render sem colocá-lo no repositório.
