@@ -123,7 +123,7 @@ export default function HeroBackgroundCarousel({ slides = [] }) {
 
       {/* Barra Inferior Discreta: Indicador da Foto e Pontos (SEM OS QUADRINHOS) */}
       {total > 1 && (
-        <div className="absolute bottom-20 md:bottom-28 inset-x-0 z-20 flex flex-col items-center justify-center gap-2 pointer-events-auto">
+        <div className="absolute bottom-[140px] md:bottom-[152px] inset-x-0 z-20 flex flex-col items-center justify-center gap-2 pointer-events-auto">
           {/* Legenda Discreta da Foto Atual */}
           {currentSlide && currentSlide.titulo && (
             <div className="inline-flex items-center gap-2 bg-black/40 backdrop-blur-md px-3.5 py-1 rounded-full text-xs text-white/90 border border-white/10 font-medium">

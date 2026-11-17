@@ -80,7 +80,7 @@ export default function BibleTypewriter() {
   }, [displayedText, isDeleting, fullText, typingSpeed]);
 
   return (
-    <div className="w-full max-w-4xl mx-auto px-4 mt-6">
+    <div className="w-full max-w-4xl mx-auto px-4">
       <div className="relative overflow-hidden rounded-2xl bg-black/45 border border-white/20 backdrop-blur-md px-5 py-4 shadow-2xl flex items-center gap-3.5 text-left">
         {/* Ícone Solene */}
         <div className="shrink-0 w-10 h-10 rounded-xl bg-green-500/20 border border-green-400/30 flex items-center justify-center text-green-300">

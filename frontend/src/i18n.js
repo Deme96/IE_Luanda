@@ -20,7 +20,7 @@ const resources = {
       "site_contact": "Contato",
       "site_restricted_access": "Acesso Restrito",
       
-      "site_hero_title": "Igreja Evangélica da Guiné-Bissau",
+      "site_hero_title": "Igreja Evangélica de Luanda",
       "site_hero_subtitle": "Um lugar de fé, esperança e comunhão. Venha fazer parte da nossa família.",
       "site_hero_schedule": "Ver Horários",
       
@@ -70,7 +70,7 @@ const resources = {
       "site_contact": "Contact",
       "site_restricted_access": "Restricted Access",
 
-      "site_hero_title": "Evangelical Church of Guinea-Bissau",
+      "site_hero_title": "Evangelical Church of Luanda",
       "site_hero_subtitle": "A place of faith, hope, and communion. Come join our family.",
       "site_hero_schedule": "View Schedule",
 
@@ -119,7 +119,7 @@ const resources = {
       "site_contact": "Contact",
       "site_restricted_access": "Accès Restreint",
 
-      "site_hero_title": "Église Évangélique de Guinée-Bissau",
+      "site_hero_title": "Église Évangélique de Luanda",
       "site_hero_subtitle": "Un lieu de foi, d'espérance et de communion. Venez rejoindre notre famille.",
       "site_hero_schedule": "Voir l'horaire",
 

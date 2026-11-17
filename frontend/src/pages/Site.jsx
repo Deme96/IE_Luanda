@@ -8,7 +8,7 @@ import { base44 } from "@/base44";
 import { Link } from "react-router-dom";
 import { getVideoSource } from "@/lib/video";
 import {
-  MapPin, Phone, Mail, Clock, CheckCircle, ChevronRight,
+  MapPin, Phone, Clock, CheckCircle, ChevronRight,
   BookOpen, Heart, Users, ArrowRight, Pickaxe, Bell, Newspaper,
   ChevronDown, ChevronUp, X, Sparkles
 } from "lucide-react";
@@ -107,12 +107,12 @@ export default function Site() {
         style={{
           background: "hsl(142, 70%, 11%)",
         }}
-        className="relative text-white overflow-hidden min-h-[620px] md:min-h-[680px] flex flex-col justify-center"
+        className="relative text-white overflow-hidden min-h-[700px] md:min-h-[760px] flex flex-col justify-center"
       >
         {/* Carrossel em toda a parte traseira da zona com alta clareza e tom verde puro */}
         <HeroBackgroundCarousel slides={carouselSlides} />
 
-        <div className="relative z-10 max-w-5xl mx-auto px-6 py-14 md:py-20 text-center">
+        <div className="relative z-10 max-w-5xl mx-auto px-6 py-14 md:py-20 pb-36 text-center">
           <div
             style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "rgba(10, 40, 20, 0.55)", border: "1px solid rgba(255,255,255,0.3)", borderRadius: 999, padding: "7px 20px", fontSize: 13, marginBottom: 20, backdropFilter: "blur(8px)", boxShadow: "0 4px 20px rgba(0,0,0,0.3)" }}
           >
@@ -146,10 +146,11 @@ export default function Site() {
             </a>
           </div>
 
-          {/* Prompt com efeito Typewriter / Máquina de escrever com versículos bíblicos */}
-          <BibleTypewriter />
         </div>
 
+        <div className="absolute inset-x-0 bottom-0 z-10">
+          <BibleTypewriter />
+        </div>
       </section>
 
       {upcomingMeetings.length > 0 && (
@@ -253,7 +254,7 @@ export default function Site() {
             <div style={{ display: "inline-block", background: "hsl(142, 60%, 25%, 0.15)", color: "hsl(142, 60%, 25%)", borderRadius: 999, padding: "4px 16px", fontSize: 13, fontWeight: 600, marginBottom: 16 }}>NOSSA MISSÃO</div>
             <h2 style={{ fontSize: "2.5rem", fontWeight: 800, color: "#111827", marginBottom: 16, lineHeight: 1.2 }}>Edificando vidas,<br />transformando comunidades</h2>
             <p style={{ color: "#6b7280", maxWidth: 560, margin: "0 auto", lineHeight: 1.7 }}>
-              Comprometidos com a Palavra de Deus e com o serviço ao próximo, crescemos juntos em fé e amor fraternal na capital Bissau e em todas as regiões da Guiné-Bissau.
+              Comprometidos com a Palavra de Deus e com o serviço ao próximo, crescemos juntos em fé e amor fraternal em Luanda e em outras localidades.
             </p>
           </div>
 
@@ -284,7 +285,7 @@ export default function Site() {
                   <Sparkles size={18} className="text-military" /> Nossa Trajetória e Visão Ministerial
                 </h4>
                 <p className="text-sm text-gray-700 leading-relaxed">
-                  Fundada há mais de três décadas em Bissau, a Igreja Evangélica da Guiné-Bissau nasceu com o firme propósito de pregar o Evangelho integral de Jesus Cristo, restaurar lares desfeitos e ser um farol de esperança e verdade espiritual na sociedade guineense.
+                  A Igreja Evangélica de Luanda tem o propósito de pregar o Evangelho integral de Jesus Cristo, restaurar lares e ser um farol de esperança e verdade espiritual na comunidade.
                 </p>
                 <p className="text-sm text-gray-700 leading-relaxed">
                   Ao longo dos anos, expandimos congregações por vários bairros e setores, estabelecemos frentes missionárias no interior e desenvolvemos ministérios voltados para a formação de crianças, fortalecimento de jovens e suporte a famílias necessitadas.
@@ -390,7 +391,7 @@ export default function Site() {
             <div style={{ textAlign: "center", marginBottom: 64 }}>
               <div style={{ display: "inline-block", background: "hsl(142, 60%, 25%, 0.15)", color: "hsl(142, 60%, 25%)", borderRadius: 999, padding: "4px 16px", fontSize: 13, fontWeight: 600, marginBottom: 16 }}>{t("site_news").toUpperCase()}</div>
               <h2 style={{ fontSize: "2.5rem", fontWeight: 800, color: "#111827", lineHeight: 1.2 }}>Fique por Dentro</h2>
-              <p style={{ color: "#6b7280", marginTop: 12 }}>Avisos, conferências e novidades da congregação na Guiné-Bissau.</p>
+              <p style={{ color: "#6b7280", marginTop: 12 }}>Avisos, conferências e novidades da Igreja Evangélica de Luanda.</p>
             </div>
             
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: 24 }}>
@@ -569,7 +570,7 @@ export default function Site() {
             <div style={{ textAlign: "center", marginBottom: 64 }}>
               <div style={{ display: "inline-block", background: "hsl(142, 60%, 25%, 0.15)", color: "hsl(142, 60%, 25%)", borderRadius: 999, padding: "4px 16px", fontSize: 13, fontWeight: 600, marginBottom: 16 }}>CONGREGAÇÕES</div>
               <h2 style={{ fontSize: "2.5rem", fontWeight: 800, color: "#111827", lineHeight: 1.2 }}>Igrejas Filiadas</h2>
-              <p style={{ color: "#6b7280", marginTop: 12 }}>Encontre uma congregação próxima de você em Bissau e demais regiões.</p>
+              <p style={{ color: "#6b7280", marginTop: 12 }}>Encontre uma congregação próxima de você em Luanda e demais regiões.</p>
             </div>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 20 }}>
               {(showAllIgrejas ? igrejas : igrejas.slice(0, 2)).map(ig => (
@@ -632,9 +633,7 @@ export default function Site() {
             {/* Informações */}
             <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
               {[
-                { icon: MapPin, title: "Endereço", text: "Avenida Amílcar Cabral, Bissau, Guiné-Bissau" },
-                { icon: Phone, title: "Telefone", text: "+245 955 000 000" },
-                { icon: Mail, title: "E-mail", text: "contato@iegb.org" },
+                { icon: MapPin, title: "Endereço", text: "Luanda, Angola" },
               ].map(item => {
                 const Icon = item.icon;
                 return (
@@ -690,9 +689,9 @@ export default function Site() {
       <footer className="site-footer" style={{ background: "hsl(142, 70%, 12%)", color: "rgba(255,255,255,0.75)", padding: "48px 24px" }}>
         <div className="max-w-5xl mx-auto" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 40 }}>
           <div>
-            <div style={{ color: "white", fontWeight: 800, fontSize: "1.25rem", marginBottom: 12 }}>🏛️ I.E.G.B.</div>
+            <div style={{ color: "white", fontWeight: 800, fontSize: "1.25rem", marginBottom: 12 }}>🏛️ I.E.L.</div>
             <p style={{ fontSize: "0.875rem", lineHeight: 1.7 }}>
-              Igreja Evangélica da Guiné-Bissau — Proclamando o Evangelho de Cristo, edificando vidas e servindo a comunidade com fé e amor.
+              Igreja Evangélica de Luanda — Proclamando o Evangelho de Cristo, edificando vidas e servindo a comunidade com fé e amor.
             </p>
           </div>
           <div>
@@ -716,7 +715,7 @@ export default function Site() {
           </div>
         </div>
         <div style={{ borderTop: "1px solid rgba(255,255,255,0.1)", marginTop: 40, paddingTop: 24, textAlign: "center", fontSize: "0.8rem" }}>
-          © {new Date().getFullYear()} Igreja Evangélica da Guiné-Bissau. Todos os direitos reservados.
+          © {new Date().getFullYear()} Igreja Evangélica de Luanda. Todos os direitos reservados.
         </div>
       </footer>
 

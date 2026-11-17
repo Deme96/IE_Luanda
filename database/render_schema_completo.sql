@@ -1,7 +1,7 @@
 -- ==============================================================================
--- SCRIPT COMPLETO DE BANCO DE DADOS - GESTÃO ECLESIÁSTICA I.E.G.B.
+-- SCRIPT COMPLETO DE BANCO DE DADOS - GESTÃO ECLESIÁSTICA I.E.L.
 -- PostgreSQL 15+ (Compatível com Render, Supabase, Neon e Local)
--- Realidade: Guiné-Bissau (Moeda XOF / Francos CFA, Municípios e Bairros)
+-- Realidade: Igreja Evangélica de Luanda, Angola
 -- ==============================================================================
 
 -- 1. EXTENSÕES
@@ -24,11 +24,11 @@ CREATE TABLE IF NOT EXISTS usuarios (
 -- 3. TABELA DE CONFIGURAÇÕES GERAIS DA INSTITUIÇÃO
 CREATE TABLE IF NOT EXISTS configuracoes (
     id SERIAL PRIMARY KEY,
-    nome_igreja VARCHAR(255) NOT NULL DEFAULT 'Igreja Evangélica da Guiné-Bissau',
+    nome_igreja VARCHAR(255) NOT NULL DEFAULT 'Igreja Evangélica de Luanda',
     idioma_padrao VARCHAR(10) DEFAULT 'pt',
-    telefone VARCHAR(50) DEFAULT '+245 955 000 000',
-    email VARCHAR(100) DEFAULT 'contato@iegb.org',
-    endereco TEXT DEFAULT 'Avenida Amílcar Cabral, Bissau, Guiné-Bissau',
+    telefone VARCHAR(50),
+    email VARCHAR(100),
+    endereco TEXT DEFAULT 'Luanda, Angola',
     politica_uso TEXT,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -64,7 +64,7 @@ CREATE TABLE IF NOT EXISTS membros (
     telefone VARCHAR(50),
     data_nascimento DATE,
     endereco TEXT,
-    cidade VARCHAR(100) DEFAULT 'Bissau',
+    cidade VARCHAR(100) DEFAULT 'Luanda',
     departamento VARCHAR(100),
     estado_civil VARCHAR(50) CHECK (estado_civil IN ('solteiro', 'casado', 'divorciado', 'viuvo')),
     status VARCHAR(50) DEFAULT 'ativo' CHECK (status IN ('ativo', 'inativo', 'afastado')),
@@ -247,7 +247,7 @@ CREATE TABLE IF NOT EXISTS site_noticias (
 INSERT INTO usuarios (nome, email, password_hash, cargo, role, status, permissoes)
 VALUES (
     'Administrador Geral',
-    'admin@iegb.org',
+    'admin@iel.org',
     'admin',
     'Pastor Presidente',
     'admin',
@@ -258,12 +258,12 @@ VALUES (
 -- 2. Configurações da Igreja
 INSERT INTO configuracoes (nome_igreja, idioma_padrao, telefone, email, endereco, politica_uso)
 VALUES (
-    'Igreja Evangélica da Guiné-Bissau',
+    'Igreja Evangélica de Luanda',
     'pt',
-    '+245 955 000 000',
-    'contato@iegb.org',
-    'Avenida Amílcar Cabral, Bissau, Guiné-Bissau',
-    'Bem-vindo ao sistema de Gestão Eclesiástica da Igreja Evangélica da Guiné-Bissau. O uso indevido das informações confidenciais está sujeito a penalidades éticas e legais.'
+    NULL,
+    NULL,
+    'Luanda, Angola',
+    'Bem-vindo ao sistema de Gestão Eclesiástica da Igreja Evangélica de Luanda. O uso indevido das informações confidenciais está sujeito a penalidades éticas e legais.'
 ) ON CONFLICT DO NOTHING;
 
 -- 3. Departamentos
@@ -276,16 +276,16 @@ ON CONFLICT (nome) DO NOTHING;
 
 -- 4. Congregações
 INSERT INTO igrejas_filiadas (nome, endereco, cidade, pastor, telefone, status) VALUES
-('Congregação Bissau Centro', 'Avenida Combatentes da Liberdade da Pátria', 'Bissau', 'Pb. Carlos', '+245 955 111 222', 'ativa'),
-('Congregação Bafatá', 'Bairro Central, Bafatá', 'Bafatá', 'Ev. Pedro', '+245 955 333 444', 'ativa'),
-('Congregação Gabú', 'Estrada Principal de Gabú', 'Gabú', 'Ev. Serifo', '+245 955 555 666', 'ativa')
+('Congregação Luanda Centro', 'Luanda, Angola', 'Luanda', 'Pb. Carlos', '+244 900 111 222', 'ativa'),
+('Congregação de Viana', 'Viana, Luanda', 'Viana', 'Ev. Pedro', '+244 900 333 444', 'ativa'),
+('Congregação de Cacuaco', 'Cacuaco, Luanda', 'Cacuaco', 'Ev. Serifo', '+244 900 555 666', 'ativa')
 ON CONFLICT DO NOTHING;
 
 -- 5. Membros Iniciais
 INSERT INTO membros (nome, email, telefone, data_nascimento, endereco, cidade, departamento, estado_civil, status, cargo) VALUES
-('Aminata Baldé', 'aminata.balde@iegb.org', '+245 955 001 111', '1985-04-12', 'Bairro de Belém, Bissau', 'Bissau', 'Jovens', 'casado', 'ativo', 'Líder de Célula'),
-('Umaro Cande', 'umaro.cande@iegb.org', '+245 955 002 222', '1990-09-03', 'Bairro Militar, Bissau', 'Bissau', 'Senhoras', 'solteiro', 'ativo', 'Diácono'),
-('Fatoumata Sissoco', 'fatou.sissoco@iegb.org', '+245 955 003 333', '1998-12-20', 'Bairro de Santa Luzia, Bissau', 'Bissau', 'Louvor', 'solteiro', 'ativo', 'Vocalista')
+('Aminata Baldé', 'aminata.balde@iel.org', '+244 900 001 111', '1985-04-12', 'Luanda, Angola', 'Luanda', 'Jovens', 'casado', 'ativo', 'Líder de Célula'),
+('Umaro Cande', 'umaro.cande@iel.org', '+244 900 002 222', '1990-09-03', 'Luanda, Angola', 'Luanda', 'Senhoras', 'solteiro', 'ativo', 'Diácono'),
+('Fatoumata Sissoco', 'fatou.sissoco@iel.org', '+244 900 003 333', '1998-12-20', 'Luanda, Angola', 'Luanda', 'Louvor', 'solteiro', 'ativo', 'Vocalista')
 ON CONFLICT DO NOTHING;
 
 -- 6. Projetos Sociais (Valores em XOF)

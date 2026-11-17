@@ -52,11 +52,11 @@ export default function Configuracoes() {
   // Dados de Sistema
   const [config, setConfig] = useState({
     id: "1",
-    nome_igreja: "Igreja Evangélica da Guiné-Bissau",
+    nome_igreja: "Igreja Evangélica de Luanda",
     idioma_padrao: "pt",
-    telefone: "+245 955 000 000",
-    email: "contato@iegb.org",
-    endereco: "Avenida Amílcar Cabral, Bissau, Guiné-Bissau",
+    telefone: "",
+    email: "",
+    endereco: "Luanda, Angola",
     politica_uso: ""
   });
 
@@ -851,7 +851,7 @@ export default function Configuracoes() {
                         id="nome_igreja"
                         value={config.nome_igreja} 
                         onChange={(e) => setConfig({ ...config, nome_igreja: e.target.value })}
-                        placeholder="Ex: Igreja Evangélica da Guiné-Bissau" 
+                        placeholder="Ex: Igreja Evangélica de Luanda"
                         required
                       />
                     </div>
@@ -874,7 +874,7 @@ export default function Configuracoes() {
                         id="telefone"
                         value={config.telefone || ""} 
                         onChange={(e) => setConfig({ ...config, telefone: e.target.value })}
-                        placeholder="+245 955 000 000" 
+                        placeholder="Ex: +244 9XX XXX XXX"
                       />
                     </div>
                     <div className="space-y-2">
@@ -884,7 +884,7 @@ export default function Configuracoes() {
                         type="email"
                         value={config.email || ""} 
                         onChange={(e) => setConfig({ ...config, email: e.target.value })}
-                        placeholder="contato@iegb.org" 
+                        placeholder="E-mail institucional"
                       />
                     </div>
                     <div className="space-y-2 sm:col-span-2">
@@ -893,7 +893,7 @@ export default function Configuracoes() {
                         id="endereco"
                         value={config.endereco || ""} 
                         onChange={(e) => setConfig({ ...config, endereco: e.target.value })}
-                        placeholder="Ex: Avenida Amílcar Cabral, Bissau, Guiné-Bissau" 
+                        placeholder="Ex: Luanda, Angola"
                       />
                     </div>
                   </div>

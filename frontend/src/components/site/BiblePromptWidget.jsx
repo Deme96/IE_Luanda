@@ -110,7 +110,7 @@ export default function BiblePromptWidget() {
 
   const handleCopy = () => {
     if (!currentMessage) return;
-    const textToCopy = `"${currentMessage.versiculo}" — ${currentMessage.referencia}\n\nReflexão: ${currentMessage.reflexao}\n(Igreja Evangélica da Guiné-Bissau)`;
+    const textToCopy = `"${currentMessage.versiculo}" — ${currentMessage.referencia}\n\nReflexão: ${currentMessage.reflexao}\n(Igreja Evangélica de Luanda)`;
     navigator.clipboard.writeText(textToCopy);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);

@@ -132,7 +132,7 @@ export default function Layout() {
             <span className="text-xl">🏛️</span>
             <div>
               <div className="font-extrabold tracking-tight text-white leading-tight">Gestão Eclesiástica</div>
-              <div className="text-[11px] text-green-300 font-normal">Igreja Evangélica da Guiné-Bissau</div>
+              <div className="text-[11px] text-green-300 font-normal">Igreja Evangélica de Luanda</div>
             </div>
           </div>
         </div>
@@ -237,7 +237,7 @@ export default function Layout() {
         {/* Topbar */}
         <header className="admin-topbar bg-white border-b border-gray-200 h-16 flex items-center justify-between px-6 shrink-0 shadow-sm z-10">
           <div className="flex items-center gap-3">
-            <span className="text-sm font-medium text-gray-500">Igreja Evangélica da Guiné-Bissau</span>
+            <span className="text-sm font-medium text-gray-500">Igreja Evangélica de Luanda</span>
           </div>
           
           <div className="flex items-center gap-4">

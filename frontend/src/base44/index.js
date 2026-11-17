@@ -106,28 +106,28 @@ const DEFAULT_DB = {
   ],
   Videos: [],
   Membro: [
-    { id: "1", nome: "Aminata Baldé", email: "aminata.balde@iegb.org", telefone: "+245 955 001 111", data_nascimento: "1985-04-12", endereco: "Bairro de Belém, Bissau", status: "ativo", departamento: "Jovens", estado_civil: "casado", data_batismo: "2005-06-10", cargo: "Líder de Célula" },
-    { id: "2", nome: "Umaro Cande", email: "umaro.cande@iegb.org", telefone: "+245 955 002 222", data_nascimento: "1990-09-03", endereco: "Bairro Militar, Bissau", status: "ativo", departamento: "Senhoras", estado_civil: "solteiro", data_batismo: "2010-11-05", cargo: "Diácono" },
-    { id: "3", nome: "Fatoumata Sissoco", email: "fatou.sissoco@iegb.org", telefone: "+245 955 003 333", data_nascimento: "1998-12-20", endereco: "Bairro de Santa Luzia, Bissau", status: "ativo", departamento: "Louvor", estado_civil: "solteiro", data_batismo: "2019-05-12", cargo: "Vocalista" },
-    { id: "4", nome: "Mateus Silva", email: "mateus.silva@iegb.org", telefone: "+245 955 004 444", data_nascimento: "1992-07-15", endereco: "Plubá, Bissau", status: "ativo", departamento: "Jovens", estado_civil: "casado", data_batismo: "2012-04-18", cargo: "Coordenador" },
-    { id: "5", nome: "Beatriz António", email: "beatriz.antonio@iegb.org", telefone: "+245 955 005 555", data_nascimento: "2000-02-28", endereco: "Bairro de Ajuda, Bissau", status: "ativo", departamento: "Infantil", estado_civil: "solteiro", data_batismo: "2021-08-09", cargo: "Professora EBD" }
+    { id: "1", nome: "Aminata Baldé", email: "aminata.balde@iel.org", telefone: "+244 900 001 111", data_nascimento: "1985-04-12", endereco: "Luanda, Angola", status: "ativo", departamento: "Jovens", estado_civil: "casado", data_batismo: "2005-06-10", cargo: "Líder de Célula" },
+    { id: "2", nome: "Umaro Cande", email: "umaro.cande@iel.org", telefone: "+244 900 002 222", data_nascimento: "1990-09-03", endereco: "Luanda, Angola", status: "ativo", departamento: "Senhoras", estado_civil: "solteiro", data_batismo: "2010-11-05", cargo: "Diácono" },
+    { id: "3", nome: "Fatoumata Sissoco", email: "fatou.sissoco@iel.org", telefone: "+244 900 003 333", data_nascimento: "1998-12-20", endereco: "Luanda, Angola", status: "ativo", departamento: "Louvor", estado_civil: "solteiro", data_batismo: "2019-05-12", cargo: "Vocalista" },
+    { id: "4", nome: "Mateus Silva", email: "mateus.silva@iel.org", telefone: "+244 900 004 444", data_nascimento: "1992-07-15", endereco: "Luanda, Angola", status: "ativo", departamento: "Jovens", estado_civil: "casado", data_batismo: "2012-04-18", cargo: "Coordenador" },
+    { id: "5", nome: "Beatriz António", email: "beatriz.antonio@iel.org", telefone: "+244 900 005 555", data_nascimento: "2000-02-28", endereco: "Luanda, Angola", status: "ativo", departamento: "Infantil", estado_civil: "solteiro", data_batismo: "2021-08-09", cargo: "Professora EBD" }
   ],
   Lider: [],
   ConselhoPresbiterio: [
-    { id: "1", nome: "Pr. Mário Gomes", cargo: "Presidente", email: "mario.gomes@iegb.org", telefone: "+245 955 010 101" },
-    { id: "2", nome: "Pb. Mama Djalo", cargo: "Secretário", email: "mama.djalo@iegb.org", telefone: "+245 955 020 202" }
+    { id: "1", nome: "Pr. Mário Gomes", cargo: "Presidente", email: "mario.gomes@iel.org", telefone: "+244 900 010 101" },
+    { id: "2", nome: "Pb. Mama Djalo", cargo: "Secretário", email: "mama.djalo@iel.org", telefone: "+244 900 020 202" }
   ],
   Reuniao: [
-    { id: "1", assunto: "Reunião Ordinária do Conselho de Presbitério", data: "2026-11-16", hora: "18:00", local: "Sala do Conselho - Bissau Sede", descricao: "Deliberação sobre novos diáconos e planejamento do culto de Ação de Graças." },
-    { id: "2", assunto: "Reunião de Acompanhamento Financeiro", data: "2026-11-19", hora: "17:30", local: "Auditório Central de Bissau", descricao: "Revisão dos relatórios de dízimos, ofertas e prestação de contas dos projetos." },
-    { id: "3", assunto: "Assembleia Geral de Membros e Líderes", data: "2026-11-23", hora: "19:00", local: "Templo Central - Bissau", descricao: "Apresentação dos resultados ministeriais de 2026 e diretrizes para o próximo ano." },
+    { id: "1", assunto: "Reunião Ordinária do Conselho de Presbitério", data: "2026-11-16", hora: "18:00", local: "Sala do Conselho - Luanda", descricao: "Deliberação sobre novos diáconos e planejamento do culto de Ação de Graças." },
+    { id: "2", assunto: "Reunião de Acompanhamento Financeiro", data: "2026-11-19", hora: "17:30", local: "Auditório Central de Luanda", descricao: "Revisão dos relatórios de dízimos, ofertas e prestação de contas dos projetos." },
+    { id: "3", assunto: "Assembleia Geral de Membros e Líderes", data: "2026-11-23", hora: "19:00", local: "Templo Central - Luanda", descricao: "Apresentação dos resultados ministeriais de 2026 e diretrizes para o próximo ano." },
     { id: "4", assunto: "Reunião de Oração e Alinhamento da Liderança", data: "2026-11-26", hora: "07:30", local: "Gabinete Pastoral", descricao: "Momento devocional e intercessão com os pastores e líderes de departamentos." }
   ],
   EscalaCulto: [
     { id: "1", equipe: "Ministério de Louvor e Vozes", data: "2026-11-15", hora: "18:30", observacao: "Culto de Domingo - Templo Central" },
     { id: "2", equipe: "Diaconia e Recepção de Visitantes", data: "2026-11-17", hora: "19:00", observacao: "Culto de Ensino Bíblico e Doutrina" },
     { id: "3", equipe: "Comunicação e Transmissão ao Vivo", data: "2026-11-20", hora: "19:30", observacao: "Vigília de Avivamento e Poder" },
-    { id: "4", equipe: "Evangelismo e Ação Social", data: "2026-11-22", hora: "08:30", observacao: "Ação de Evangelismo nos Bairros de Bissau e arredores" }
+    { id: "4", equipe: "Evangelismo e Ação Social", data: "2026-11-22", hora: "08:30", observacao: "Ação de Evangelismo nos bairros de Luanda e arredores" }
   ],
   Dizimo: [
     { id: "1", nome_membro: "Aminata Baldé", membro_id: "1", valor: "50000", data: "2026-07-05", forma_pagamento: "transferencia", observacao: "Dízimo de Julho" },
@@ -149,7 +149,7 @@ const DEFAULT_DB = {
   Documento: [
     { id: "1", titulo: "Ata da Assembleia Geral Ordinária", tipo: "ata", categoria: "ata", data: "2026-11-02", autor: "Pb. Mama Djalo (Secretário)", file_url: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf", descricao: "Aprovação unânime do relatório de contas do 3º trimestre e homologação dos novos oficiais do conselho presbiteral." },
     { id: "2", titulo: "Estatuto Social e Canônico da Igreja", tipo: "estatuto", categoria: "estatuto", data: "2024-01-15", autor: "Conselho Presbiteral", file_url: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf", descricao: "Estatuto oficial registrado em cartório que rege as diretrizes eclesiásticas, administrativas e confessionais da I.E.L." },
-    { id: "3", titulo: "Certidão de Batismo Coletivo - Turma 2026", tipo: "certidao", categoria: "certidao", data: "2026-10-28", autor: "Pr. Mário Gomes", file_url: "https://images.unsplash.com/photo-1544427920-c49ccfb85579?auto=format&fit=crop&w=1200&q=80", descricao: "Registro oficial da celebração batismal por imersão de 42 novos crentes na fé em Bissau." },
+    { id: "3", titulo: "Certidão de Batismo Coletivo - Turma 2026", tipo: "certidao", categoria: "certidao", data: "2026-10-28", autor: "Pr. Mário Gomes", file_url: "https://images.unsplash.com/photo-1544427920-c49ccfb85579?auto=format&fit=crop&w=1200&q=80", descricao: "Registro oficial da celebração batismal por imersão de 42 novos crentes na fé em Luanda." },
     { id: "4", titulo: "Relatório Financeiro e Balancete Trimestral", tipo: "relatorio", categoria: "relatorio", data: "2026-11-08", autor: "Tesouraria Central", file_url: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf", descricao: "Demonstrativo detalhado de entradas de dízimos, ofertas e despesas operacionais da igreja sede e filiais." },
     { id: "5", titulo: "Ofício Pastoral de Nomeação de Líderes", tipo: "oficio", categoria: "oficio", data: "2026-11-10", autor: "Pastorado Titular", file_url: "", descricao: "Designação oficial de novos líderes de células e professores da Escola Bíblica Dominical para o próximo ano eclesiástico." },
     { id: "6", titulo: "Contrato de Prestação de Serviços de Climatização", tipo: "contrato", categoria: "contrato", data: "2026-10-15", autor: "Comissão de Patrimônio", file_url: "", descricao: "Contrato firmado com a empresa de engenharia térmica para manutenção preventiva do auditório principal." }
@@ -158,36 +158,36 @@ const DEFAULT_DB = {
     { id: "1", nome: "Acesso à Água Potável nas Tabancas", orcamento: "5000000", valor_arrecadado: "1200000", status: "em_andamento", data_inicio: "2025-01-01", data_fim: "2027-12-31", responsavel: "Pr. Mário Gomes", descricao: "Projeto para melhorar o acesso à água potável em tabancas e comunidades rurais com perfuração de furos artesianos e bombas solares em setores com escassez de água tratada." },
     { id: "2", nome: "Programa de Saúde Comunitária e Alimentos", orcamento: "800000", valor_arrecadado: "650000", status: "em_andamento", data_inicio: "2026-03-01", data_fim: "2026-12-31", responsavel: "Pb. Mama Djalo", descricao: "Ações de assistência médica básica, exames preventivos e distribuição contínua de cestas alimentares para famílias vulneráveis cadastradas no programa de apoio social da congregação." },
     { id: "3", nome: "Construção do Centro Comunitário Infantil", orcamento: "8500000", valor_arrecadado: "3200000", status: "em_andamento", data_inicio: "2026-02-01", data_fim: "2027-06-30", responsavel: "Ir. Ana Paula", descricao: "Construção de salas de alfabetização, reforço escolar, laboratório de informática e berçário para atender mais de duzentas crianças com alimentação diária e ensino cristão." },
-    { id: "4", nome: "Evangelização e Plantação de Igrejas no Interior", orcamento: "4200000", valor_arrecadado: "2900000", status: "em_andamento", data_inicio: "2026-01-15", data_fim: "2026-12-20", responsavel: "Ev. Pedro Catete", descricao: "Envio e sustento de missionários voluntários para regiões de Gabú, Bafatá e Cacheu, provendo materiais bíblicos, suporte espiritual, plantação de congregações locais e assistência humanitária." },
+    { id: "4", nome: "Evangelização e Plantação de Igrejas no Interior", orcamento: "4200000", valor_arrecadado: "2900000", status: "em_andamento", data_inicio: "2026-01-15", data_fim: "2026-12-20", responsavel: "Ev. Pedro Catete", descricao: "Envio e sustento de missionários para regiões atendidas pela igreja, provendo materiais bíblicos, suporte espiritual, plantação de congregações locais e assistência humanitária." },
     { id: "5", nome: "Escola de Música e Artes Sacras da Juventude", orcamento: "2800000", valor_arrecadado: "1950000", status: "em_andamento", data_inicio: "2026-03-01", data_fim: "2026-11-30", responsavel: "Ir. Paulo David", descricao: "Aquisição de teclados, violões, instrumentos de sopro e percussão para capacitar gratuitamente jovens da comunidade, promovendo inclusão social, disciplina e formação musical." },
-    { id: "6", nome: "Projeto Pão da Vida & Apoio Social", orcamento: "1500000", valor_arrecadado: "1100000", status: "em_andamento", data_inicio: "2026-01-01", data_fim: "2026-12-31", responsavel: "Ir. Maria Esperança", descricao: "Distribuição semanal de refeições quentes, vestuário e kits de higiene pessoal para pessoas em situação de vulnerabilidade e acolhimento nos bairros periféricos de Bissau." },
+    { id: "6", nome: "Projeto Pão da Vida & Apoio Social", orcamento: "1500000", valor_arrecadado: "1100000", status: "em_andamento", data_inicio: "2026-01-01", data_fim: "2026-12-31", responsavel: "Ir. Maria Esperança", descricao: "Distribuição semanal de refeições quentes, vestuário e kits de higiene pessoal para pessoas em situação de vulnerabilidade nos bairros periféricos de Luanda." },
     { id: "7", nome: "Capacitação Profissional e Empreendedorismo", orcamento: "3500000", valor_arrecadado: "2100000", status: "em_andamento", data_inicio: "2026-04-01", data_fim: "2027-02-28", responsavel: "Pb. Carlos Silva", descricao: "Oficinas práticas de corte e costura, eletricidade básica, informática e pequenos negócios para capacitar chefes de família ao mercado de trabalho e gerar rendimento sustentável." },
-    { id: "8", nome: "Reforma e Climatização do Templo Sede", orcamento: "12000000", valor_arrecadado: "7400000", status: "em_andamento", data_inicio: "2025-06-01", data_fim: "2026-12-31", responsavel: "Pr. Mário Gomes", descricao: "Modernização das instalações acústicas, reforma geral dos sanitários, rampas de acessibilidade e melhorias no auditório principal do Templo Central em Bissau." }
+    { id: "8", nome: "Reforma e Climatização do Templo Sede", orcamento: "12000000", valor_arrecadado: "7400000", status: "em_andamento", data_inicio: "2025-06-01", data_fim: "2026-12-31", responsavel: "Pr. Mário Gomes", descricao: "Modernização das instalações acústicas, reforma geral dos sanitários, rampas de acessibilidade e melhorias no auditório principal do Templo Central em Luanda." }
   ],
   IgrejaFilhada: [
-    { id: "1", nome: "Congregação Bissau Centro", pastor: "Pb. Carlos", endereco: "Avenida Combatentes da Liberdade da Pátria", cidade: "Bissau", telefone: "+245 955 111 222", status: "ativa" },
-    { id: "2", nome: "Congregação Bafatá", pastor: "Ev. Pedro", endereco: "Bairro Central, Bafatá", cidade: "Bafatá", telefone: "+245 955 333 444", status: "ativa" },
-    { id: "3", nome: "Congregação Gabú", pastor: "Ev. Serifo", endereco: "Estrada Principal de Gabú", cidade: "Gabú", telefone: "+245 955 555 666", status: "ativa" }
+    { id: "1", nome: "Congregação Luanda Centro", pastor: "Pb. Carlos", endereco: "Luanda, Angola", cidade: "Luanda", telefone: "+244 900 111 222", status: "ativa" },
+    { id: "2", nome: "Congregação de Viana", pastor: "Ev. Pedro", endereco: "Viana, Luanda", cidade: "Viana", telefone: "+244 900 333 444", status: "ativa" },
+    { id: "3", nome: "Congregação de Cacuaco", pastor: "Ev. Serifo", endereco: "Cacuaco, Luanda", cidade: "Cacuaco", telefone: "+244 900 555 666", status: "ativa" }
   ],
   Configuracoes: [
     {
       id: "1",
-      nome_igreja: "Igreja Evangélica da Guiné-Bissau",
+      nome_igreja: "Igreja Evangélica de Luanda",
       idioma_padrao: "pt",
-      telefone: "+245 955 000 000",
-      email: "contato@iegb.org",
-      endereco: "Avenida Amílcar Cabral, Bissau, Guiné-Bissau",
-      politica_uso: "Bem-vindo ao sistema de Gestão Eclesiástica da Igreja Evangélica da Guiné-Bissau. Este sistema é destinado ao uso exclusivo de membros e líderes autorizados. O uso indevido das informações aqui contidas está sujeito a penalidades éticas e legais. Ao fazer login, você concorda em manter a confidencialidade e a integridade de todos os dados sob sua responsabilidade."
+      telefone: "",
+      email: "",
+      endereco: "Luanda, Angola",
+      politica_uso: "Bem-vindo ao sistema de Gestão Eclesiástica da Igreja Evangélica de Luanda. Este sistema é destinado ao uso exclusivo de membros e líderes autorizados. O uso indevido das informações aqui contidas está sujeito a penalidades éticas e legais. Ao fazer login, você concorda em manter a confidencialidade e a integridade de todos os dados sob sua responsabilidade."
     }
   ],
   Noticias: [
-    { id: "1", titulo: "Grande Conferência Nacional da Juventude 2026", data: "2026-08-15", descricao: "Participe da conferência anual em Bissau para fortalecer a juventude, despertar dons ministeriais e levantar uma geração comprometida com a fé e integridade na Guiné-Bissau." },
-    { id: "2", titulo: "Mutirão Comunitário de Solidariedade", data: "2026-08-20", descricao: "Ação beneficente com doação de roupas, alimentos, atendimento médico voluntário e oração com centenas de famílias em situação de vulnerabilidade em Bissau." },
-    { id: "3", titulo: "Batismo nas Águas Reúne Centenas em Bissau", data: "2026-08-25", descricao: "Em um dia marcado por intensa emoção e louvor a Deus, dezenas de novos convertidos deram testemunho público de sua fé através do batismo bíblico por imersão, selando sua aliança com Cristo." },
+    { id: "1", titulo: "Grande Conferência Nacional da Juventude 2026", data: "2026-08-15", descricao: "Participe da conferência anual em Luanda para fortalecer a juventude, despertar dons ministeriais e levantar uma geração comprometida com a fé e integridade." },
+    { id: "2", titulo: "Mutirão Comunitário de Solidariedade", data: "2026-08-20", descricao: "Ação beneficente com doação de roupas, alimentos, atendimento médico voluntário e oração com famílias em situação de vulnerabilidade em Luanda." },
+    { id: "3", titulo: "Batismo nas Águas Reúne Centenas em Luanda", data: "2026-08-25", descricao: "Em um dia marcado por intensa emoção e louvor a Deus, dezenas de novos convertidos deram testemunho público de sua fé através do batismo bíblico por imersão, selando sua aliança com Cristo." },
     { id: "4", titulo: "Inauguração da Biblioteca e Centro de Estudos Teológicos", data: "2026-09-02", descricao: "A igreja entregou aos membros e estudantes da Bíblia um acervo de títulos bíblicos, comentários de teologia pastoral e computadores para pesquisa." },
     { id: "5", titulo: "Seminário de Finanças Bíblicas e Mordomia Cristã", data: "2026-09-10", descricao: "Especialistas convidados ministraram ensinamentos práticos e bíblicos sobre planejamento doméstico, superação de dívidas, fidelidade nos dízimos e investimento familiar responsável." },
-    { id: "6", titulo: "Campanha de Solidariedade Atende 300 Famílias", data: "2026-09-18", descricao: "Com o apoio de toda a congregação, a Sociedade Feminina concluiu com êxito a entrega de mais de trezentas cestas alimentares e kits de higiene nos bairros de maior vulnerabilidade em Bissau." },
-    { id: "7", titulo: "Coral Geral da Igreja Prepara Grande Cantata de Louvor", data: "2026-09-25", descricao: "Mais de setenta vozes da igreja iniciaram ensaios intensivos para a tradicional celebração de Ação de Graças, com entrada franca para toda a comunidade de Bissau." },
+    { id: "6", titulo: "Campanha de Solidariedade Atende 300 Famílias", data: "2026-09-18", descricao: "Com o apoio de toda a congregação, a Sociedade Feminina concluiu com êxito a entrega de cestas alimentares e kits de higiene nos bairros de maior vulnerabilidade em Luanda." },
+    { id: "7", titulo: "Coral Geral da Igreja Prepara Grande Cantata de Louvor", data: "2026-09-25", descricao: "Mais de setenta vozes da igreja iniciaram ensaios intensivos para a tradicional celebração de Ação de Graças, com entrada franca para toda a comunidade de Luanda." },
     { id: "8", titulo: "Cruzada Evangelística ao Ar Livre em Santa Luzia", data: "2026-10-05", descricao: "Três noites de louvor, oração e proclamação do Evangelho em praça pública impactaram moradores locais, resultando em vidas transformadas e renovação espiritual." }
   ],
   Cultos: [
@@ -205,7 +205,7 @@ const DEFAULT_DB = {
     { id: "12", nome: "Culto de Clamor e Cura Divina", dia: "Terça-feira", hora: "09:30", descricao: "Momento matinal com imposição de mãos, oração especial pelos enfermos e intercessão por livramento e restauração da saúde física e emocional." }
   ],
   Patrimonio: [
-    { id: "1", nome: "Templo Central Sede - Bissau", categoria: "Imovel", modalidade: "Ativo", valor_estimado: "50000000", periodo_vida: "360", data_aquisicao: "2010-03-15", estado: "Bom" },
+    { id: "1", nome: "Templo Central Sede - Luanda", categoria: "Imovel", modalidade: "Ativo", valor_estimado: "50000000", periodo_vida: "360", data_aquisicao: "2010-03-15", estado: "Bom" },
     { id: "2", nome: "Sistema de Som Digital e Instrumentos", categoria: "Equipamento", modalidade: "Ativo", valor_estimado: "3500000", periodo_vida: "60", data_aquisicao: "2023-06-01", estado: "Ótimo" },
     { id: "3", nome: "Viatura de Apoio Pastoral e Missionário", categoria: "Veiculo", modalidade: "Ativo", valor_estimado: "12000000", periodo_vida: "84", data_aquisicao: "2022-01-10", estado: "Bom" }
   ],

@@ -41,7 +41,7 @@ async function run() {
     console.log('⏳ Executando script SQL (criando tabelas e dados iniciais)...');
     await client.query(sql);
 
-    console.log('\n🎉 PARABÉNS! Todas as tabelas e dados da Guiné-Bissau foram criados com sucesso no Render!\n');
+    console.log('\n🎉 PARABÉNS! Todas as tabelas e dados da Igreja Evangélica de Luanda foram criados com sucesso no Render!\n');
   } catch (err) {
     console.error('\n❌ Falha ao executar o schema:', err.message);
   } finally {

@@ -96,7 +96,7 @@ export default function SiteNavbar() {
           href="#inicio"
           style={{ fontWeight: 800, fontSize: "1.15rem", color: "white", textDecoration: "none", display: "flex", alignItems: "center", gap: 8 }}
         >
-          🏛️ <span>I.E.G.B</span>
+          🏛️ <span>I.E.L.</span>
         </a>
 
         {/* Desktop links */}
