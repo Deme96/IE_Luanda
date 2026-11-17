@@ -21,6 +21,27 @@ CREATE TABLE IF NOT EXISTS usuarios (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+-- 2.1 DADOS COMPARTILHADOS DO FRONTEND E CONFLITOS DE MIGRAÇÃO
+CREATE TABLE IF NOT EXISTS app_records (
+    collection VARCHAR(80) NOT NULL,
+    record_id VARCHAR(255) NOT NULL,
+    data JSONB NOT NULL,
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    deleted_at TIMESTAMPTZ,
+    PRIMARY KEY (collection, record_id)
+);
+
+CREATE TABLE IF NOT EXISTS app_sync_conflicts (
+    id BIGSERIAL PRIMARY KEY,
+    collection VARCHAR(80) NOT NULL,
+    record_id VARCHAR(255) NOT NULL,
+    existing_data JSONB NOT NULL,
+    incoming_data JSONB NOT NULL,
+    source_user_id INTEGER REFERENCES usuarios(id) ON DELETE SET NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    resolved_at TIMESTAMPTZ
+);
+
 -- 3. TABELA DE CONFIGURAÇÕES GERAIS DA INSTITUIÇÃO
 CREATE TABLE IF NOT EXISTS configuracoes (
     id SERIAL PRIMARY KEY,

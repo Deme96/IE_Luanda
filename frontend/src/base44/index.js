@@ -4,6 +4,90 @@
  */
 
 const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+const API_URL = String(import.meta.env.VITE_API_URL || "").replace(/\/+$/, "");
+const USE_SHARED_API = Boolean(API_URL) || import.meta.env.PROD;
+
+const requestApi = async (path, { method = "GET", body, authenticated = true } = {}) => {
+  if (!API_URL) {
+    throw new Error("VITE_API_URL não está configurada no build do frontend.");
+  }
+
+  const headers = {};
+  if (body !== undefined) headers["Content-Type"] = "application/json";
+  const token = localStorage.getItem("base44_token");
+  if (authenticated && token) headers.Authorization = `Bearer ${token}`;
+
+  let response;
+  try {
+    response = await fetch(`${API_URL}${path}`, {
+      method,
+      headers,
+      body: body === undefined ? undefined : JSON.stringify(body),
+      cache: "no-store"
+    });
+  } catch {
+    throw new Error("Não foi possível conectar à API compartilhada. Verifique a conexão e o serviço do Render.");
+  }
+
+  const result = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    throw new Error(result.error || `Falha na API (${response.status}).`);
+  }
+  return result;
+};
+
+const cacheRemoteCollection = (collection, records) => {
+  if (collection === "users" || !Array.isArray(records)) return;
+  const db = readStoredDb();
+  db[collection] = records;
+  saveDB(db);
+};
+
+const syncLocalDatabase = async () => {
+  const localDb = readStoredDb();
+  const syncResult = await requestApi("/api/sync", {
+    method: "POST",
+    body: { collections: localDb }
+  });
+  saveDB({
+    ...localDb,
+    ...syncResult.collections,
+    _carouselContentVersion: CAROUSEL_CONTENT_VERSION,
+    _userDataOnlyVersion: USER_DATA_ONLY_VERSION
+  });
+  return syncResult;
+};
+
+const readStoredDb = () => {
+  const raw = localStorage.getItem("base44_db");
+  if (!raw) {
+    if (!USE_SHARED_API) return JSON.parse(JSON.stringify(DEFAULT_DB));
+    return Object.fromEntries(
+      Object.entries(DEFAULT_DB).map(([collection, value]) => [
+        collection,
+        Array.isArray(value) ? [] : value
+      ])
+    );
+  }
+
+  let storedDb;
+  try {
+    storedDb = JSON.parse(raw);
+  } catch {
+    throw new Error("Os dados locais estão corrompidos. Exporte o backup antes de tentar recuperar a sincronização.");
+  }
+  if (!storedDb || typeof storedDb !== "object" || Array.isArray(storedDb)) {
+    throw new Error("O formato dos dados locais não é válido.");
+  }
+
+  for (const [collection, defaultValue] of Object.entries(DEFAULT_DB)) {
+    if (collection.startsWith("_")) continue;
+    if (!Array.isArray(storedDb[collection])) {
+      storedDb[collection] = JSON.parse(JSON.stringify(USE_SHARED_API ? [] : defaultValue));
+    }
+  }
+  return storedDb;
+};
 
 const ALL_PERMISSIONS = [
   "dashboard",
@@ -358,6 +442,13 @@ export const resetDB = () => {
 export const base44 = {
   auth: {
     async register(email, password, extraData = {}) {
+      if (USE_SHARED_API) {
+        return requestApi("/api/auth/register", {
+          method: "POST",
+          authenticated: false,
+          body: { email, password, nome: extraData.nome }
+        });
+      }
       await delay(200);
       const db = getDB();
       const cleanEmail = String(email || "").trim().toLowerCase();
@@ -395,6 +486,28 @@ export const base44 = {
     },
 
     async login(email, password) {
+      if (USE_SHARED_API) {
+        const result = await requestApi("/api/auth/login", {
+          method: "POST",
+          authenticated: false,
+          body: { email, password }
+        });
+        localStorage.setItem("base44_token", result.token);
+        const user = result.user;
+
+        if (user.role === "admin") {
+          try {
+            const syncResult = await syncLocalDatabase();
+            user.syncConflictCount = syncResult.conflictCount;
+            user.syncConflicts = syncResult.conflicts;
+          } catch (error) {
+            user.syncWarning = error.message;
+          }
+        }
+
+        localStorage.setItem("base44_session", JSON.stringify(user));
+        return user;
+      }
       await delay(250);
       const db = getDB();
       const cleanEmail = String(email || "").trim().toLowerCase();
@@ -410,12 +523,28 @@ export const base44 = {
     },
 
     async logout() {
+      if (USE_SHARED_API) {
+        localStorage.removeItem("base44_token");
+      }
       await delay(100);
       localStorage.removeItem("base44_session");
       localStorage.removeItem("b44_session");
     },
 
     async getSession() {
+      if (USE_SHARED_API) {
+        const token = localStorage.getItem("base44_token");
+        if (!token) return null;
+        try {
+          const result = await requestApi("/api/auth/me");
+          localStorage.setItem("base44_session", JSON.stringify(result.user));
+          return result.user;
+        } catch {
+          localStorage.removeItem("base44_token");
+          localStorage.removeItem("base44_session");
+          return null;
+        }
+      }
       await delay(50);
       const sessionStr = localStorage.getItem("base44_session") || localStorage.getItem("b44_session");
       if (!sessionStr) return null;
@@ -442,13 +571,57 @@ export const base44 = {
   },
 
   db: {
+    async getSyncConflicts() {
+      if (!USE_SHARED_API) return [];
+      return requestApi("/api/sync/conflicts");
+    },
+
+    async syncLocal(database) {
+      if (database) {
+        database._carouselContentVersion = CAROUSEL_CONTENT_VERSION;
+        database._userDataOnlyVersion = USER_DATA_ONLY_VERSION;
+        saveDB(database);
+      }
+      if (USE_SHARED_API) return syncLocalDatabase();
+      return { conflictCount: 0, conflicts: [] };
+    },
+
+    async reset() {
+      if (USE_SHARED_API) {
+        await requestApi("/api/data/reset", { method: "POST" });
+        const cleared = clearSystemCollections(readStoredDb());
+        saveDB(cleared);
+        return cleared;
+      }
+      return resetDB();
+    },
+
     async get(collection) {
+      if (USE_SHARED_API) {
+        const records = await requestApi(`/api/collections/${encodeURIComponent(collection)}`);
+        cacheRemoteCollection(collection, records);
+        return records;
+      }
       await delay(150);
       const db = getDB();
       return db[collection] || [];
     },
 
     async create(collection, data) {
+      if (USE_SHARED_API) {
+        const id = data.id || globalThis.crypto?.randomUUID?.() || Date.now().toString();
+        const created = await requestApi(`/api/collections/${encodeURIComponent(collection)}`, {
+          method: "POST",
+          body: { ...data, id }
+        });
+        if (collection !== "users") {
+          const records = await this.get(collection);
+          if (!records.some((record) => String(record.id) === String(created.id))) {
+            cacheRemoteCollection(collection, [...records, created]);
+          }
+        }
+        return created;
+      }
       await delay(200);
       const db = getDB();
       const newItem = { id: Date.now().toString(), createdAt: new Date().toISOString(), ...data };
@@ -459,6 +632,19 @@ export const base44 = {
     },
 
     async update(collection, id, data) {
+      if (USE_SHARED_API) {
+        const updated = await requestApi(`/api/collections/${encodeURIComponent(collection)}/${encodeURIComponent(id)}`, {
+          method: "PUT",
+          body: data
+        });
+        if (collection !== "users") {
+          const records = await this.get(collection);
+          cacheRemoteCollection(collection, records.map((record) =>
+            String(record.id) === String(id) ? updated : record
+          ));
+        }
+        return updated;
+      }
       await delay(200);
       const db = getDB();
       if (!db[collection]) throw new Error("Coleção não encontrada: " + collection);
@@ -490,6 +676,16 @@ export const base44 = {
     },
 
     async delete(collection, id) {
+      if (USE_SHARED_API) {
+        const result = await requestApi(`/api/collections/${encodeURIComponent(collection)}/${encodeURIComponent(id)}`, {
+          method: "DELETE"
+        });
+        if (collection !== "users") {
+          const records = await this.get(collection);
+          cacheRemoteCollection(collection, records.filter((record) => String(record.id) !== String(id)));
+        }
+        return result;
+      }
       await delay(200);
       const db = getDB();
       if (!db[collection]) throw new Error("Coleção não encontrada: " + collection);

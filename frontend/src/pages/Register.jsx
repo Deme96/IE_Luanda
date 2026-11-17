@@ -61,6 +61,7 @@ export default function Register() {
                 type="password"
                 placeholder="Senha"
                 required
+                minLength={8}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
               />

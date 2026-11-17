@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useRef } from "react";
-import { base44, resetDB, saveDB } from "@/base44";
+import { base44 } from "@/base44";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -48,6 +48,8 @@ export default function Configuracoes() {
   const [isRestoringBackup, setIsRestoringBackup] = useState(false);
   const [activeTab, setActiveTab] = useState("sistema");
   const [loading, setLoading] = useState(false);
+  const [syncConflicts, setSyncConflicts] = useState([]);
+  const [loadingSyncConflicts, setLoadingSyncConflicts] = useState(false);
 
   // Dados de Sistema
   const [config, setConfig] = useState({
@@ -691,8 +693,9 @@ export default function Configuracoes() {
   // ═══════════════════════════════════════════════════════════════
   // BACKUP & RESTAURAÇÃO
   // ═══════════════════════════════════════════════════════════════
-  const handleExportData = () => {
+  const handleExportData = async () => {
     try {
+      await base44.db.syncLocal();
       const raw = localStorage.getItem("base44_db") || "{}";
       const blob = new Blob([raw], { type: "application/json" });
       const url = URL.createObjectURL(blob);
@@ -703,7 +706,18 @@ export default function Configuracoes() {
       URL.revokeObjectURL(url);
       toast.success("Backup baixado com sucesso!");
     } catch (e) {
-      toast.error("Erro ao exportar dados.");
+      toast.error(e.message || "Erro ao exportar dados.");
+    }
+  };
+
+  const handleLoadSyncConflicts = async () => {
+    setLoadingSyncConflicts(true);
+    try {
+      setSyncConflicts(await base44.db.getSyncConflicts());
+    } catch (error) {
+      toast.error(error.message || "Não foi possível carregar os conflitos.");
+    } finally {
+      setLoadingSyncConflicts(false);
     }
   };
 
@@ -732,7 +746,7 @@ export default function Configuracoes() {
       }
 
       const invalidCollection = Object.entries(backup).find(([key, value]) =>
-        key !== "_carouselContentVersion" && !Array.isArray(value)
+        !key.startsWith("_") && !Array.isArray(value)
       );
       if (invalidCollection) {
         throw new Error(`A coleção "${invalidCollection[0]}" tem formato inválido.`);
@@ -740,19 +754,17 @@ export default function Configuracoes() {
       if (backup.users.some(user => !user || typeof user !== "object" || !user.id || !user.email)) {
         throw new Error("O backup contém usuários sem identificador ou e-mail.");
       }
-      if (backup._carouselContentVersion !== undefined && !Number.isInteger(backup._carouselContentVersion)) {
+      if (["_carouselContentVersion", "_userDataOnlyVersion"].some((key) =>
+        backup[key] !== undefined && !Number.isInteger(backup[key])
+      )) {
         throw new Error("A versão do backup está inválida.");
       }
 
-      if (!window.confirm(`Restaurar o backup "${file.name}"? Os dados atuais serão substituídos pelos dados deste arquivo.`)) return;
+      if (!window.confirm(`Importar o backup "${file.name}"? No modo compartilhado, os dados serão mesclados e conflitos serão preservados para revisão.`)) return;
 
-      // Marcar backups antigos como já limpos evita que a migração de limpeza
-      // apague o conteúdo que está sendo recuperado do próprio arquivo.
-      backup._carouselContentVersion ??= 2;
-      backup._userDataOnlyVersion ??= 1;
-      saveDB(backup);
+      await base44.db.syncLocal(backup);
       await loadAllData();
-      toast.success("Backup restaurado com sucesso.");
+      toast.success("Backup importado e sincronizado.");
     } catch (error) {
       const storageFull = error?.name === "QuotaExceededError";
       toast.error(storageFull
@@ -765,11 +777,15 @@ export default function Configuracoes() {
     }
   };
 
-  const handleResetData = () => {
+  const handleResetData = async () => {
     if (window.confirm("Atenção: Isso apagará todos os dados do sistema, mantendo as contas de usuário. Essa ação não pode ser desfeita sem um backup. Deseja continuar?")) {
-      resetDB();
-      toast.success("Dados do sistema eliminados. As contas de usuário foram preservadas.");
-      loadAllData();
+      try {
+        await base44.db.reset();
+        toast.success("Dados do sistema eliminados. As contas de usuário foram preservadas.");
+        await loadAllData();
+      } catch (error) {
+        toast.error(error.message || "Não foi possível eliminar os dados.");
+      }
     }
   };
 
@@ -1431,7 +1447,7 @@ export default function Configuracoes() {
                   <div className="p-4 rounded-xl border border-emerald-100 bg-emerald-50/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div>
                       <h4 className="font-bold text-emerald-900">Restaurar de um Backup</h4>
-                      <p className="text-xs text-emerald-700 mt-1">Selecione o arquivo JSON baixado anteriormente. A restauração substituirá os dados atuais.</p>
+                      <p className="text-xs text-emerald-700 mt-1">Selecione o backup JSON. No modo compartilhado, os dados são mesclados e conflitos ficam para revisão.</p>
                     </div>
                     <input
                       ref={backupFileInputRef}
@@ -1449,6 +1465,44 @@ export default function Configuracoes() {
                     >
                       <Upload size={16} /> {isRestoringBackup ? "Restaurando…" : "Enviar Backup JSON"}
                     </Button>
+                  </div>
+
+                  <div className="p-4 rounded-xl border border-amber-100 bg-amber-50/50 space-y-3">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                      <div>
+                        <h4 className="font-bold text-amber-900">Conflitos de sincronização</h4>
+                        <p className="text-xs text-amber-700 mt-1">Registros locais diferentes dos que já estão no banco compartilhado.</p>
+                      </div>
+                      <Button type="button" variant="outline" onClick={handleLoadSyncConflicts} disabled={loadingSyncConflicts}>
+                        {loadingSyncConflicts ? "Carregando…" : "Ver conflitos"}
+                      </Button>
+                    </div>
+                    {syncConflicts.length > 0 && (
+                      <ul className="max-h-48 overflow-y-auto divide-y divide-amber-200 text-sm text-amber-950">
+                        {syncConflicts.map((conflict) => (
+                          <li key={conflict.id} className="py-2">
+                            <strong>{conflict.collection}</strong> — {conflict.record_id}
+                            <span className="block text-xs text-amber-700">
+                              {new Date(conflict.created_at).toLocaleString()}
+                            </span>
+                            <details className="mt-1 text-xs">
+                              <summary className="cursor-pointer">Comparar versões preservadas</summary>
+                              <div className="grid gap-2 sm:grid-cols-2 mt-2">
+                                <pre className="max-h-40 overflow-auto rounded bg-white/70 p-2 whitespace-pre-wrap break-words">
+                                  {JSON.stringify(conflict.existing_data, null, 2)}
+                                </pre>
+                                <pre className="max-h-40 overflow-auto rounded bg-white/70 p-2 whitespace-pre-wrap break-words">
+                                  {JSON.stringify(conflict.incoming_data, null, 2)}
+                                </pre>
+                              </div>
+                            </details>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                    {syncConflicts.length === 0 && !loadingSyncConflicts && (
+                      <p className="text-xs text-amber-800">Ainda não há conflitos carregados.</p>
+                    )}
                   </div>
 
                   <div className="p-4 rounded-xl border border-red-100 bg-red-50/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
