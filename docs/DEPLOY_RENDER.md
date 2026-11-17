@@ -21,7 +21,7 @@
 1. Clique em **New +** -> **Web Service**.
 2. Conecte o seu repositório GitHub.
 3. Configure os campos:
-   - **Name:** gestao-igreja-api
+   - **Name:** IE_Luanda
    - **Root Directory:** backend
    - **Environment:** Node
    - **Build Command:** npm install
@@ -31,24 +31,21 @@
    - `NODE_ENV` = production
    - `PORT` = 10000
    - `DATABASE_URL` = cole a **Internal Database URL completa** do PostgreSQL Render (não use endereço de exemplo)
-   - `CORS_ORIGIN` = https://seu-frontend.vercel.app (o link do site na Vercel)
+   - `CORS_ORIGIN` = https://igrejaemluanda.onrender.com
    - `JWT_SECRET` = uma chave aleatória forte e privada
 5. Clique em **Deploy Web Service**.
 
 ---
 
-## 3. Conectar o Frontend (Vercel) com a API (Render)
-1. No Render, copie o link público gerado para sua API (ex: `https://gestao-igreja-api.onrender.com`).
-2. Acesse o painel da **Vercel** no seu projeto do Frontend.
-3. Vá em **Settings** -> **Environment Variables**.
-4. Adicione/Edite:
-   - `VITE_API_URL` = https://gestao-igreja-api.onrender.com
-5. Vá em **Deployments** e faça um **Redeploy** do frontend.
-
-### Se o frontend também estiver no Render
-1. Abra o serviço do frontend e adicione `VITE_API_URL` como variável de build, com o endereço público da API.
-2. No serviço da API, configure `CORS_ORIGIN` com o endereço público exato do frontend.
-3. Faça um novo deploy do frontend e da API para aplicar as variáveis.
+## 3. Conectar o Static Site e a API no Render
+1. Abra o Static Site `Igrejaemluanda` no Render.
+2. Em **Environment**, configure a variável de build:
+   - `VITE_API_URL` = `https://ie-luanda.onrender.com`
+3. Use **Save and deploy** para reconstruir o frontend com a URL da API.
+4. No Web Service `IE_Luanda`, configure `CORS_ORIGIN` com a origem exata:
+   - `https://igrejaemluanda.onrender.com`
+5. Salve a variável e faça deploy do backend para aplicá-la.
+6. Em **Redirects/Rewrites** do Static Site, configure `/*` para `/index.html` com a ação **Rewrite**, para que rotas como `/login` funcionem ao abrir diretamente.
 
 ## 4. Sincronização entre aparelhos
 - O frontend usa `VITE_API_URL` no momento do build; o deploy do frontend precisa dessa variável apontando para a API Render.
