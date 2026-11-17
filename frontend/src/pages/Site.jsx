@@ -1,5 +1,6 @@
 import SiteNavbar from "@/components/site/SiteNavbar";
 import HeroBackgroundCarousel from "@/components/site/HeroBackgroundCarousel";
+import BibleTypewriter from "@/components/site/BibleTypewriter";
 import BiblePromptWidget from "@/components/site/BiblePromptWidget";
 import { useTranslation } from "react-i18next";
 import { useEffect, useState } from "react";
@@ -144,6 +145,9 @@ export default function Site() {
               {t("site_contact")}
             </a>
           </div>
+
+          {/* Prompt com efeito Typewriter / Máquina de escrever com versículos bíblicos */}
+          <BibleTypewriter />
         </div>
 
       </section>
