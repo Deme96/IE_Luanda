@@ -57,6 +57,7 @@ export default function SiteNavbar() {
   };
 
   const links = [
+    { label: "Palavra Bíblica", href: "#palavra-do-dia" },
     { label: "Vídeos", href: "#videos" },
     { label: t("site_about"), href: "#sobre" },
     { label: t("site_services"), href: "#cultos" },

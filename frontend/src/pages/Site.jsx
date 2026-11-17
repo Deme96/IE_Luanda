@@ -1,5 +1,6 @@
 import SiteNavbar from "@/components/site/SiteNavbar";
 import HeroBackgroundCarousel from "@/components/site/HeroBackgroundCarousel";
+import BiblePromptWidget from "@/components/site/BiblePromptWidget";
 import { useTranslation } from "react-i18next";
 import { useEffect, useState } from "react";
 import { base44 } from "@/base44";
@@ -189,6 +190,9 @@ export default function Site() {
           </div>
         </div>
       </section>
+
+      {/* ═══════════════ PROMPT BÍBLICO INTERATIVO ═══════════════ */}
+      <BiblePromptWidget />
 
       {/* ═══════════════ VÍDEOS ═══════════════ */}
       <section id="videos" style={{ padding: "72px 24px", background: "#f9fafb", scrollMarginTop: 72 }}>
