@@ -56,7 +56,7 @@ export default function Configuracoes() {
     idioma_padrao: "pt",
     telefone: "",
     email: "",
-    endereco: "Luanda, Angola",
+    endereco: "Luanda, Guiné-Bissau",
     politica_uso: ""
   });
 
@@ -893,7 +893,7 @@ export default function Configuracoes() {
                         id="endereco"
                         value={config.endereco || ""} 
                         onChange={(e) => setConfig({ ...config, endereco: e.target.value })}
-                        placeholder="Ex: Luanda, Angola"
+                        placeholder="Ex: Luanda, Guiné-Bissau"
                       />
                     </div>
                   </div>

@@ -106,11 +106,11 @@ const DEFAULT_DB = {
   ],
   Videos: [],
   Membro: [
-    { id: "1", nome: "Aminata Baldé", email: "aminata.balde@iel.org", telefone: "+244 900 001 111", data_nascimento: "1985-04-12", endereco: "Luanda, Angola", status: "ativo", departamento: "Jovens", estado_civil: "casado", data_batismo: "2005-06-10", cargo: "Líder de Célula" },
-    { id: "2", nome: "Umaro Cande", email: "umaro.cande@iel.org", telefone: "+244 900 002 222", data_nascimento: "1990-09-03", endereco: "Luanda, Angola", status: "ativo", departamento: "Senhoras", estado_civil: "solteiro", data_batismo: "2010-11-05", cargo: "Diácono" },
-    { id: "3", nome: "Fatoumata Sissoco", email: "fatou.sissoco@iel.org", telefone: "+244 900 003 333", data_nascimento: "1998-12-20", endereco: "Luanda, Angola", status: "ativo", departamento: "Louvor", estado_civil: "solteiro", data_batismo: "2019-05-12", cargo: "Vocalista" },
-    { id: "4", nome: "Mateus Silva", email: "mateus.silva@iel.org", telefone: "+244 900 004 444", data_nascimento: "1992-07-15", endereco: "Luanda, Angola", status: "ativo", departamento: "Jovens", estado_civil: "casado", data_batismo: "2012-04-18", cargo: "Coordenador" },
-    { id: "5", nome: "Beatriz António", email: "beatriz.antonio@iel.org", telefone: "+244 900 005 555", data_nascimento: "2000-02-28", endereco: "Luanda, Angola", status: "ativo", departamento: "Infantil", estado_civil: "solteiro", data_batismo: "2021-08-09", cargo: "Professora EBD" }
+    { id: "1", nome: "Aminata Baldé", email: "aminata.balde@iel.org", telefone: "+244 900 001 111", data_nascimento: "1985-04-12", endereco: "Luanda, Guiné-Bissau", status: "ativo", departamento: "Jovens", estado_civil: "casado", data_batismo: "2005-06-10", cargo: "Líder de Célula" },
+    { id: "2", nome: "Umaro Cande", email: "umaro.cande@iel.org", telefone: "+244 900 002 222", data_nascimento: "1990-09-03", endereco: "Luanda, Guiné-Bissau", status: "ativo", departamento: "Senhoras", estado_civil: "solteiro", data_batismo: "2010-11-05", cargo: "Diácono" },
+    { id: "3", nome: "Fatoumata Sissoco", email: "fatou.sissoco@iel.org", telefone: "+244 900 003 333", data_nascimento: "1998-12-20", endereco: "Luanda, Guiné-Bissau", status: "ativo", departamento: "Louvor", estado_civil: "solteiro", data_batismo: "2019-05-12", cargo: "Vocalista" },
+    { id: "4", nome: "Mateus Silva", email: "mateus.silva@iel.org", telefone: "+244 900 004 444", data_nascimento: "1992-07-15", endereco: "Luanda, Guiné-Bissau", status: "ativo", departamento: "Jovens", estado_civil: "casado", data_batismo: "2012-04-18", cargo: "Coordenador" },
+    { id: "5", nome: "Beatriz António", email: "beatriz.antonio@iel.org", telefone: "+244 900 005 555", data_nascimento: "2000-02-28", endereco: "Luanda, Guiné-Bissau", status: "ativo", departamento: "Infantil", estado_civil: "solteiro", data_batismo: "2021-08-09", cargo: "Professora EBD" }
   ],
   Lider: [],
   ConselhoPresbiterio: [
@@ -165,7 +165,7 @@ const DEFAULT_DB = {
     { id: "8", nome: "Reforma e Climatização do Templo Sede", orcamento: "12000000", valor_arrecadado: "7400000", status: "em_andamento", data_inicio: "2025-06-01", data_fim: "2026-12-31", responsavel: "Pr. Mário Gomes", descricao: "Modernização das instalações acústicas, reforma geral dos sanitários, rampas de acessibilidade e melhorias no auditório principal do Templo Central em Luanda." }
   ],
   IgrejaFilhada: [
-    { id: "1", nome: "Congregação Luanda Centro", pastor: "Pb. Carlos", endereco: "Luanda, Angola", cidade: "Luanda", telefone: "+244 900 111 222", status: "ativa" },
+    { id: "1", nome: "Congregação Luanda Centro", pastor: "Pb. Carlos", endereco: "Luanda, Guiné-Bissau", cidade: "Luanda", telefone: "+244 900 111 222", status: "ativa" },
     { id: "2", nome: "Congregação de Viana", pastor: "Ev. Pedro", endereco: "Viana, Luanda", cidade: "Viana", telefone: "+244 900 333 444", status: "ativa" },
     { id: "3", nome: "Congregação de Cacuaco", pastor: "Ev. Serifo", endereco: "Cacuaco, Luanda", cidade: "Cacuaco", telefone: "+244 900 555 666", status: "ativa" }
   ],
@@ -176,7 +176,7 @@ const DEFAULT_DB = {
       idioma_padrao: "pt",
       telefone: "",
       email: "",
-      endereco: "Luanda, Angola",
+      endereco: "Luanda, Guiné-Bissau",
       politica_uso: "Bem-vindo ao sistema de Gestão Eclesiástica da Igreja Evangélica de Luanda. Este sistema é destinado ao uso exclusivo de membros e líderes autorizados. O uso indevido das informações aqui contidas está sujeito a penalidades éticas e legais. Ao fazer login, você concorda em manter a confidencialidade e a integridade de todos os dados sob sua responsabilidade."
     }
   ],

@@ -633,7 +633,7 @@ export default function Site() {
             {/* Informações */}
             <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
               {[
-                { icon: MapPin, title: "Endereço", text: "Luanda, Angola" },
+                { icon: MapPin, title: "Endereço", text: "Luanda, Guiné-Bissau" },
               ].map(item => {
                 const Icon = item.icon;
                 return (

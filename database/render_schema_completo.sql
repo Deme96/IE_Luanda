@@ -1,7 +1,7 @@
 -- ==============================================================================
 -- SCRIPT COMPLETO DE BANCO DE DADOS - GESTÃO ECLESIÁSTICA I.E.L.
 -- PostgreSQL 15+ (Compatível com Render, Supabase, Neon e Local)
--- Realidade: Igreja Evangélica de Luanda, Angola
+-- Realidade: Igreja Evangélica de Luanda, Guiné-Bissau
 -- ==============================================================================
 
 -- 1. EXTENSÕES
@@ -28,7 +28,7 @@ CREATE TABLE IF NOT EXISTS configuracoes (
     idioma_padrao VARCHAR(10) DEFAULT 'pt',
     telefone VARCHAR(50),
     email VARCHAR(100),
-    endereco TEXT DEFAULT 'Luanda, Angola',
+    endereco TEXT DEFAULT 'Luanda, Guiné-Bissau',
     politica_uso TEXT,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -262,7 +262,7 @@ VALUES (
     'pt',
     NULL,
     NULL,
-    'Luanda, Angola',
+    'Luanda, Guiné-Bissau',
     'Bem-vindo ao sistema de Gestão Eclesiástica da Igreja Evangélica de Luanda. O uso indevido das informações confidenciais está sujeito a penalidades éticas e legais.'
 ) ON CONFLICT DO NOTHING;
 
@@ -276,16 +276,16 @@ ON CONFLICT (nome) DO NOTHING;
 
 -- 4. Congregações
 INSERT INTO igrejas_filiadas (nome, endereco, cidade, pastor, telefone, status) VALUES
-('Congregação Luanda Centro', 'Luanda, Angola', 'Luanda', 'Pb. Carlos', '+244 900 111 222', 'ativa'),
+('Congregação Luanda Centro', 'Luanda, Guiné-Bissau', 'Luanda', 'Pb. Carlos', '+244 900 111 222', 'ativa'),
 ('Congregação de Viana', 'Viana, Luanda', 'Viana', 'Ev. Pedro', '+244 900 333 444', 'ativa'),
 ('Congregação de Cacuaco', 'Cacuaco, Luanda', 'Cacuaco', 'Ev. Serifo', '+244 900 555 666', 'ativa')
 ON CONFLICT DO NOTHING;
 
 -- 5. Membros Iniciais
 INSERT INTO membros (nome, email, telefone, data_nascimento, endereco, cidade, departamento, estado_civil, status, cargo) VALUES
-('Aminata Baldé', 'aminata.balde@iel.org', '+244 900 001 111', '1985-04-12', 'Luanda, Angola', 'Luanda', 'Jovens', 'casado', 'ativo', 'Líder de Célula'),
-('Umaro Cande', 'umaro.cande@iel.org', '+244 900 002 222', '1990-09-03', 'Luanda, Angola', 'Luanda', 'Senhoras', 'solteiro', 'ativo', 'Diácono'),
-('Fatoumata Sissoco', 'fatou.sissoco@iel.org', '+244 900 003 333', '1998-12-20', 'Luanda, Angola', 'Luanda', 'Louvor', 'solteiro', 'ativo', 'Vocalista')
+('Aminata Baldé', 'aminata.balde@iel.org', '+244 900 001 111', '1985-04-12', 'Luanda, Guiné-Bissau', 'Luanda', 'Jovens', 'casado', 'ativo', 'Líder de Célula'),
+('Umaro Cande', 'umaro.cande@iel.org', '+244 900 002 222', '1990-09-03', 'Luanda, Guiné-Bissau', 'Luanda', 'Senhoras', 'solteiro', 'ativo', 'Diácono'),
+('Fatoumata Sissoco', 'fatou.sissoco@iel.org', '+244 900 003 333', '1998-12-20', 'Luanda, Guiné-Bissau', 'Luanda', 'Louvor', 'solteiro', 'ativo', 'Vocalista')
 ON CONFLICT DO NOTHING;
 
 -- 6. Projetos Sociais (Valores em XOF)
