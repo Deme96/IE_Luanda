@@ -34,20 +34,8 @@ export default function Login() {
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      const user = await base44.auth.login(email, password);
-      if (user.syncWarning) {
-        toast.warning(`Login concluído, mas a sincronização inicial falhou: ${user.syncWarning}`);
-      } else if (user.syncConflictCount > 0) {
-        const conflictExamples = (user.syncConflicts || [])
-          .slice(0, 3)
-          .map(({ collection, record_id }) => `${collection} ${record_id}`)
-          .join(", ");
-        toast.warning(
-          `Dados sincronizados. ${user.syncConflictCount} conflito(s) foram preservados para revisão. ${conflictExamples}`
-        );
-      } else {
-        toast.success("Login efetuado com sucesso!");
-      }
+      await base44.auth.login(email, password);
+      toast.success("Login efetuado com sucesso!");
       navigate("/admin");
     } catch (e) {
       toast.error(e.message || "Erro ao fazer login");

@@ -48,8 +48,6 @@ export default function Configuracoes() {
   const [isRestoringBackup, setIsRestoringBackup] = useState(false);
   const [activeTab, setActiveTab] = useState("sistema");
   const [loading, setLoading] = useState(false);
-  const [syncConflicts, setSyncConflicts] = useState([]);
-  const [loadingSyncConflicts, setLoadingSyncConflicts] = useState(false);
 
   // Dados de Sistema
   const [config, setConfig] = useState({
@@ -695,9 +693,8 @@ export default function Configuracoes() {
   // ═══════════════════════════════════════════════════════════════
   const handleExportData = async () => {
     try {
-      await base44.db.syncLocal();
-      const raw = localStorage.getItem("base44_db") || "{}";
-      const blob = new Blob([raw], { type: "application/json" });
+      const backup = await base44.db.export();
+      const blob = new Blob([JSON.stringify(backup, null, 2)], { type: "application/json" });
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
@@ -707,17 +704,6 @@ export default function Configuracoes() {
       toast.success("Backup baixado com sucesso!");
     } catch (e) {
       toast.error(e.message || "Erro ao exportar dados.");
-    }
-  };
-
-  const handleLoadSyncConflicts = async () => {
-    setLoadingSyncConflicts(true);
-    try {
-      setSyncConflicts(await base44.db.getSyncConflicts());
-    } catch (error) {
-      toast.error(error.message || "Não foi possível carregar os conflitos.");
-    } finally {
-      setLoadingSyncConflicts(false);
     }
   };
 
@@ -741,7 +727,7 @@ export default function Configuracoes() {
       });
       const backup = JSON.parse(contents);
 
-      if (!backup || typeof backup !== "object" || Array.isArray(backup) || !Array.isArray(backup.users)) {
+      if (!backup || typeof backup !== "object" || Array.isArray(backup)) {
         throw new Error("O arquivo não parece ser um backup válido do sistema.");
       }
 
@@ -751,25 +737,23 @@ export default function Configuracoes() {
       if (invalidCollection) {
         throw new Error(`A coleção "${invalidCollection[0]}" tem formato inválido.`);
       }
-      if (backup.users.some(user => !user || typeof user !== "object" || !user.id || !user.email)) {
-        throw new Error("O backup contém usuários sem identificador ou e-mail.");
-      }
-      if (["_carouselContentVersion", "_userDataOnlyVersion"].some((key) =>
-        backup[key] !== undefined && !Number.isInteger(backup[key])
-      )) {
-        throw new Error("A versão do backup está inválida.");
+      const hasDataCollections = Object.entries(backup).some(([key, value]) =>
+        !key.startsWith("_") && key !== "users" && Array.isArray(value)
+      );
+      if (!hasDataCollections) {
+        throw new Error("O backup não contém coleções de dados para restaurar.");
       }
 
-      if (!window.confirm(`Importar o backup "${file.name}"? No modo compartilhado, os dados serão mesclados e conflitos serão preservados para revisão.`)) return;
+      if (!window.confirm(`Restaurar o backup "${file.name}" na base de dados compartilhada? Registros com o mesmo identificador serão substituídos pelos dados do backup.`)) return;
 
-      await base44.db.syncLocal(backup);
+      const result = await base44.db.importBackup(backup);
       await loadAllData();
-      toast.success("Backup importado e sincronizado.");
+      const importedCount = Object.values(result.imported || {}).reduce((total, count) => total + count, 0);
+      toast.success(
+        `Backup restaurado: ${importedCount} registro(s) incluído(s) ou atualizado(s).`
+      );
     } catch (error) {
-      const storageFull = error?.name === "QuotaExceededError";
-      toast.error(storageFull
-        ? "Não há espaço suficiente no navegador para restaurar este backup."
-        : error instanceof SyntaxError
+      toast.error(error instanceof SyntaxError
           ? "O arquivo não contém um JSON válido."
           : error.message || "Não foi possível restaurar o backup.");
     } finally {
@@ -1447,7 +1431,7 @@ export default function Configuracoes() {
                   <div className="p-4 rounded-xl border border-emerald-100 bg-emerald-50/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div>
                       <h4 className="font-bold text-emerald-900">Restaurar de um Backup</h4>
-                      <p className="text-xs text-emerald-700 mt-1">Selecione o backup JSON. No modo compartilhado, os dados são mesclados e conflitos ficam para revisão.</p>
+                      <p className="text-xs text-emerald-700 mt-1">A restauração grava os dados na base compartilhada. Registros existentes com o mesmo identificador são atualizados; os restantes são mantidos.</p>
                     </div>
                     <input
                       ref={backupFileInputRef}
@@ -1465,44 +1449,6 @@ export default function Configuracoes() {
                     >
                       <Upload size={16} /> {isRestoringBackup ? "Restaurando…" : "Enviar Backup JSON"}
                     </Button>
-                  </div>
-
-                  <div className="p-4 rounded-xl border border-amber-100 bg-amber-50/50 space-y-3">
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                      <div>
-                        <h4 className="font-bold text-amber-900">Conflitos de sincronização</h4>
-                        <p className="text-xs text-amber-700 mt-1">Registros locais diferentes dos que já estão no banco compartilhado.</p>
-                      </div>
-                      <Button type="button" variant="outline" onClick={handleLoadSyncConflicts} disabled={loadingSyncConflicts}>
-                        {loadingSyncConflicts ? "Carregando…" : "Ver conflitos"}
-                      </Button>
-                    </div>
-                    {syncConflicts.length > 0 && (
-                      <ul className="max-h-48 overflow-y-auto divide-y divide-amber-200 text-sm text-amber-950">
-                        {syncConflicts.map((conflict) => (
-                          <li key={conflict.id} className="py-2">
-                            <strong>{conflict.collection}</strong> — {conflict.record_id}
-                            <span className="block text-xs text-amber-700">
-                              {new Date(conflict.created_at).toLocaleString()}
-                            </span>
-                            <details className="mt-1 text-xs">
-                              <summary className="cursor-pointer">Comparar versões preservadas</summary>
-                              <div className="grid gap-2 sm:grid-cols-2 mt-2">
-                                <pre className="max-h-40 overflow-auto rounded bg-white/70 p-2 whitespace-pre-wrap break-words">
-                                  {JSON.stringify(conflict.existing_data, null, 2)}
-                                </pre>
-                                <pre className="max-h-40 overflow-auto rounded bg-white/70 p-2 whitespace-pre-wrap break-words">
-                                  {JSON.stringify(conflict.incoming_data, null, 2)}
-                                </pre>
-                              </div>
-                            </details>
-                          </li>
-                        ))}
-                      </ul>
-                    )}
-                    {syncConflicts.length === 0 && !loadingSyncConflicts && (
-                      <p className="text-xs text-amber-800">Ainda não há conflitos carregados.</p>
-                    )}
                   </div>
 
                   <div className="p-4 rounded-xl border border-red-100 bg-red-50/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4">

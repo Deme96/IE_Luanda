@@ -1,22 +1,17 @@
+require('dotenv').config({ path: require('path').join(__dirname, '.env') });
+
 /**
  * Script utilitário para listar todas as tabelas e quantidade de registros no Render
- * Uso:
- * node backend/verificar-tabelas.js 'SUA_EXTERNAL_DATABASE_URL'
+ * Uso: configure DATABASE_URL para gestao-igreja-db e execute node backend/verificar-tabelas.js
  */
 
 const { Client } = require('pg');
 
 async function check() {
-  const args = process.argv.slice(2);
-  let connectionString = args.join(' ').trim() || process.env.DATABASE_URL;
-
-  if (connectionString) {
-    connectionString = connectionString.replace(/^["']|["']$/g, '').trim();
-  }
+  const connectionString = process.env.DATABASE_URL;
 
   if (!connectionString) {
-    console.error('\n❌ ERRO: Forneça a URL externa do banco!');
-    console.log('Exemplo: node backend/verificar-tabelas.js "SUA_EXTERNAL_URL"\n');
+    console.error('\nERRO: Configure DATABASE_URL para o PostgreSQL gestao-igreja-db.\n');
     process.exit(1);
   }
 

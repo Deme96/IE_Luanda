@@ -1,23 +1,14 @@
 require('dotenv').config();
 const { Pool } = require('pg');
 
-const isProduction = process.env.NODE_ENV === 'production';
+if (!process.env.DATABASE_URL) {
+  throw new Error('DATABASE_URL deve apontar para o PostgreSQL compartilhado gestao-igreja-db.');
+}
 
-const poolConfig = process.env.DATABASE_URL
-  ? {
-      connectionString: process.env.DATABASE_URL,
-      ssl: isProduction ? { rejectUnauthorized: false } : false,
-    }
-  : {
-      user: process.env.DB_USER || 'postgres',
-      host: process.env.DB_HOST || 'localhost',
-      database: process.env.DB_NAME || 'gestao_igreja',
-      password: process.env.DB_PASSWORD || 'postgres',
-      port: process.env.DB_PORT || 5432,
-      ssl: process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : false,
-    };
-
-const pool = new Pool(poolConfig);
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: { rejectUnauthorized: false },
+});
 
 pool.on('error', (err) => {
   console.error('Unexpected error on idle client', err);

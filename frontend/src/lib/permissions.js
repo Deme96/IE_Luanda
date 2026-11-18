@@ -161,7 +161,7 @@ export const MENU_SECTIONS = [
       { key: "configuracoes.projetos", label: "Configuração de Projetos", descricao: "Gerenciar projetos institucionais" },
       { key: "configuracoes.noticias", label: "Notícias & Avisos do Site", descricao: "Publicar novidades e comunicados institucionais" },
       { key: "configuracoes.politica", label: "Política de Bom Uso", descricao: "Editar o termo que aparece no login" },
-      { key: "configuracoes.backup", label: "Backup e Restauração", descricao: "Exportar JSON e restaurar dados de demonstração" }
+      { key: "configuracoes.backup", label: "Backup e Restauração", descricao: "Exportar e restaurar os dados do sistema" }
     ]
   }
 ];

@@ -1,7 +1,8 @@
+require('dotenv').config({ path: require('path').join(__dirname, '.env') });
+
 /**
  * Script utilitário para executar as tabelas e dados no banco de dados do Render
- * Uso:
- * node backend/executar-schema.js "SUA_EXTERNAL_DATABASE_URL_DO_RENDER"
+ * Uso: configure DATABASE_URL para gestao-igreja-db e execute node backend/executar-schema.js
  */
 
 const { Client } = require('pg');
@@ -9,19 +10,10 @@ const fs = require('fs');
 const path = require('path');
 
 async function run() {
-  // Pega o argumento ou junta se o PowerShell separou com espaços
-  const args = process.argv.slice(2);
-  let connectionString = args.join(' ').trim() || process.env.DATABASE_URL;
-
-  // Remove aspas extras se existirem
-  if (connectionString) {
-    connectionString = connectionString.replace(/^["']|["']$/g, '').trim();
-  }
+  const connectionString = process.env.DATABASE_URL;
 
   if (!connectionString) {
-    console.error('\n❌ ERRO: Nenhuma URL de banco de dados foi fornecida!');
-    console.log('\nComo usar:');
-    console.log('node backend/executar-schema.js "postgresql://usuario:senha@host-externo.render.com:5432/gestao_igreja"\n');
+    console.error('\nERRO: Configure DATABASE_URL para o PostgreSQL gestao-igreja-db.\n');
     process.exit(1);
   }
 

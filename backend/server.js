@@ -75,7 +75,7 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization'],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS']
 }));
-app.use(express.json({ limit: '25mb' }));
+app.use(express.json({ limit: '35mb' }));
 app.use('/api', (req, res, next) => {
   res.set('Cache-Control', 'no-store');
   next();
@@ -192,11 +192,6 @@ async function requirePermission(req, permission) {
 
 function isObject(value) {
   return value !== null && typeof value === 'object' && !Array.isArray(value);
-}
-
-function safeUserRecord(user) {
-  const { password, password_hash, ...safe } = user;
-  return safe;
 }
 
 function canonicalLoginEmails(email) {
@@ -453,179 +448,78 @@ app.post('/api/data/reset', async (req, res, next) => {
   }
 });
 
-app.post('/api/sync', async (req, res, next) => {
+app.get('/api/data/export', async (req, res, next) => {
+  try {
+    await requirePermission(req, 'configuracoes.backup');
+    const records = await db.query(
+      'SELECT collection, data FROM app_records WHERE deleted_at IS NULL ORDER BY collection, record_id'
+    );
+    const collections = Object.fromEntries(
+      Object.keys(COLLECTIONS).map((collection) => [collection, []])
+    );
+    for (const row of records.rows) {
+      if (!collections[row.collection]) collections[row.collection] = [];
+      collections[row.collection].push(row.data);
+    }
+    res.json(collections);
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.post('/api/data/import', async (req, res, next) => {
   let client;
   try {
-    const user = await requirePermission(req, 'configuracoes.backup');
+    await requirePermission(req, 'configuracoes.backup');
     const collections = req.body?.collections;
-    if (!isObject(collections)) throw httpError(400, 'Os dados para sincronizar não são válidos.');
+    if (!isObject(collections)) throw httpError(400, 'Os dados do backup não são válidos.');
+
+    const dataCollections = Object.entries(collections)
+      .filter(([collection, records]) => COLLECTIONS[collection] && Array.isArray(records));
+    if (!dataCollections.length) {
+      throw httpError(400, 'O backup não contém coleções de dados reconhecidas.');
+    }
+    for (const [collection, records] of dataCollections) {
+      if (records.some((record) => !isObject(record) || record.id === undefined || record.id === null)) {
+        throw httpError(400, `A coleção "${collection}" contém um registo sem identificador válido.`);
+      }
+    }
 
     client = await db.pool.connect();
     await client.query('BEGIN');
     const imported = {};
-    for (const [collection, records] of Object.entries(collections)) {
-      if (collection.startsWith('_')) continue;
-      if (collection === 'users' && Array.isArray(records)) {
-        imported.users = 0;
-        for (const incoming of records) {
-          if (!isObject(incoming)) continue;
-          const email = normalizeEmail(incoming.email);
-          if (!email || ['admin@iel.com', 'admin@iel.org', 'admin@iegb.org'].includes(email)) continue;
-          if (
-            incoming.password === 'admin'
-            && ['secretaria@iel.com', 'financeiro@iel.com'].includes(email)
-          ) continue;
-          const aliases = canonicalLoginEmails(email);
-          const existing = await client.query(
-            `SELECT id, nome, email, cargo, role, status, permissoes
-             FROM usuarios WHERE lower(email) = ANY($1::text[]) ORDER BY id LIMIT 1`,
-            [aliases]
-          );
-          const incomingProfile = safeUserRecord({
-            ...incoming,
-            email,
-            permissoes: Array.isArray(incoming.permissoes) ? incoming.permissoes : ['dashboard']
-          });
-          if (!existing.rows[0]) {
-            const password = String(incoming.password || '');
-            if (password.length < 8) {
-              await client.query(
-                `INSERT INTO app_sync_conflicts
-                  (collection, record_id, existing_data, incoming_data, source_user_id)
-                 VALUES ('users', $1, '{"reason":"password must contain at least 8 characters"}'::jsonb, $2::jsonb, $3)`,
-                [email, JSON.stringify(incomingProfile), user.id]
-              );
-              continue;
-            }
-            await client.query(
-              `INSERT INTO usuarios (nome, email, password_hash, cargo, role, status, permissoes)
-               VALUES ($1, $2, $3, $4, $5, $6, $7::jsonb)`,
-              [
-                String(incoming.nome || email.split('@')[0]),
-                email,
-                hashPassword(password),
-                incoming.cargo || null,
-                incoming.role || 'personalizado',
-                incoming.status || 'ativo',
-                JSON.stringify(incomingProfile.permissoes)
-              ]
-            );
-            imported.users += 1;
-            continue;
-          }
-
-          const existingProfile = publicUser(existing.rows[0]);
-          const comparableFields = ['nome', 'email', 'cargo', 'role', 'status', 'permissoes'];
-          const existingComparable = Object.fromEntries(comparableFields.map((field) => [field, existingProfile[field] || (field === 'permissoes' ? [] : '')]));
-          const incomingComparable = Object.fromEntries(comparableFields.map((field) => [field, incomingProfile[field] || (field === 'permissoes' ? [] : '')]));
-          const sameProfile = JSON.stringify(existingComparable) === JSON.stringify(incomingComparable);
-          if (!sameProfile) {
-            const alreadyReported = await client.query(
-              `SELECT 1 FROM app_sync_conflicts
-               WHERE collection = 'users' AND record_id = $1 AND incoming_data = $2::jsonb
-                 AND resolved_at IS NULL LIMIT 1`,
-              [email, JSON.stringify(incomingProfile)]
-            );
-            if (!alreadyReported.rowCount) {
-              await client.query(
-                `INSERT INTO app_sync_conflicts
-                  (collection, record_id, existing_data, incoming_data, source_user_id)
-                 VALUES ('users', $1, $2::jsonb, $3::jsonb, $4)`,
-                [email, JSON.stringify(existingProfile), JSON.stringify(incomingProfile), user.id]
-              );
-            }
-          }
-        }
-        continue;
-      }
-      if (!COLLECTIONS[collection] || !Array.isArray(records)) continue;
-      imported[collection] = 0;
+    for (const [collection, records] of dataCollections) {
+      const recordsById = new Map();
       for (const incoming of records) {
-        if (!isObject(incoming) || incoming.id === undefined || incoming.id === null) continue;
         const id = String(incoming.id);
-        const payload = JSON.stringify({ ...incoming, id });
-        const insert = await client.query(
-          `INSERT INTO app_records (collection, record_id, data)
-           VALUES ($1, $2, $3::jsonb)
-           ON CONFLICT (collection, record_id) DO NOTHING`,
-          [collection, id, payload]
-        );
-        if (insert.rowCount) {
-          imported[collection] += 1;
-          continue;
-        }
-        const current = await client.query(
-          'SELECT data, data = $3::jsonb AS equal, deleted_at FROM app_records WHERE collection = $1 AND record_id = $2',
-          [collection, id, payload]
-        );
-        if (current.rows[0] && (current.rows[0].deleted_at || !current.rows[0].equal)) {
-          const alreadyReported = await client.query(
-            `SELECT 1 FROM app_sync_conflicts
-             WHERE collection = $1 AND record_id = $2 AND incoming_data = $3::jsonb
-               AND resolved_at IS NULL LIMIT 1`,
-            [collection, id, payload]
-          );
-          if (alreadyReported.rowCount) continue;
-          await client.query(
-            `INSERT INTO app_sync_conflicts (collection, record_id, existing_data, incoming_data, source_user_id)
-             VALUES ($1, $2, $3::jsonb, $4::jsonb, $5)`,
-            [
-              collection,
-              id,
-              JSON.stringify(current.rows[0].deleted_at
-                ? { deleted: true, record: current.rows[0].data }
-                : current.rows[0].data),
-              payload,
-              user.id
-            ]
-          );
-        }
+        recordsById.set(id, { ...incoming, id });
       }
+
+      const normalizedRecords = [...recordsById.values()];
+      await client.query(
+        `INSERT INTO app_records (collection, record_id, data)
+         SELECT $1, incoming.data->>'id', incoming.data
+         FROM jsonb_array_elements($2::jsonb) AS incoming(data)
+         ON CONFLICT (collection, record_id) DO UPDATE
+         SET data = EXCLUDED.data, updated_at = NOW(), deleted_at = NULL`,
+        [collection, JSON.stringify(normalizedRecords)]
+      );
+      imported[collection] = normalizedRecords.length;
     }
 
-    const stored = await client.query(
-      'SELECT collection, record_id, data FROM app_records WHERE deleted_at IS NULL ORDER BY collection, record_id'
-    );
-    const serverCollections = Object.fromEntries(Object.keys(COLLECTIONS).map((collection) => [collection, []]));
-    for (const row of stored.rows) {
-      if (!serverCollections[row.collection]) serverCollections[row.collection] = [];
-      serverCollections[row.collection].push(row.data);
-    }
-    const pendingConflicts = await client.query(
-      `SELECT id, collection, record_id FROM app_sync_conflicts
-       WHERE resolved_at IS NULL ORDER BY created_at DESC LIMIT 500`
-    );
     await client.query('COMMIT');
-    res.json({
-      imported,
-      conflictCount: pendingConflicts.rows.length,
-      conflicts: pendingConflicts.rows,
-      collections: serverCollections
-    });
+    res.json({ imported });
   } catch (error) {
     if (client) {
       try {
         await client.query('ROLLBACK');
       } catch (rollbackError) {
-        console.error('Failed to roll back data sync:', rollbackError);
+        console.error('Failed to roll back backup import:', rollbackError);
       }
     }
     next(error);
   } finally {
     if (client) client.release();
-  }
-});
-
-app.get('/api/sync/conflicts', async (req, res, next) => {
-  try {
-    await requirePermission(req, 'configuracoes.backup');
-    const result = await db.query(
-      `SELECT id, collection, record_id, existing_data, incoming_data, created_at
-       FROM app_sync_conflicts WHERE resolved_at IS NULL ORDER BY created_at DESC LIMIT 500`
-    );
-    res.json(result.rows);
-  } catch (error) {
-    next(error);
   }
 });
 
@@ -677,18 +571,6 @@ async function start() {
     )
   `);
   await db.query('ALTER TABLE app_records ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMPTZ');
-  await db.query(`
-    CREATE TABLE IF NOT EXISTS app_sync_conflicts (
-      id BIGSERIAL PRIMARY KEY,
-      collection VARCHAR(80) NOT NULL,
-      record_id VARCHAR(255) NOT NULL,
-      existing_data JSONB NOT NULL,
-      incoming_data JSONB NOT NULL,
-      source_user_id INTEGER REFERENCES usuarios(id) ON DELETE SET NULL,
-      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-      resolved_at TIMESTAMPTZ
-    )
-  `);
   app.listen(PORT, () => {
     console.log(`Backend server running on port ${PORT}`);
   });

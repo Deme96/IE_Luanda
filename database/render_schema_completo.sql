@@ -1,6 +1,6 @@
 -- ==============================================================================
 -- SCRIPT COMPLETO DE BANCO DE DADOS - GESTÃO ECLESIÁSTICA I.E.L.
--- PostgreSQL 15+ (Compatível com Render, Supabase, Neon e Local)
+-- PostgreSQL 15+ do serviço compartilhado gestao-igreja-db no Render
 -- Realidade: Igreja Evangélica de Luanda, Guiné-Bissau
 -- ==============================================================================
 
@@ -39,7 +39,7 @@ SET role = 'admin',
     permissoes = '["dashboard","estatisticas","membros","departamentos","conselho","secretaria","entradas","encargos","patrimonio","projetos","igrejas","configuracoes"]'::jsonb
 WHERE lower(email) IN ('admin@iel.com', 'admin@iel.org', 'admin@iegb.org');
 
--- 2.1 DADOS COMPARTILHADOS DO FRONTEND E CONFLITOS DE MIGRAÇÃO
+-- 2.1 DADOS COMPARTILHADOS DO FRONTEND
 CREATE TABLE IF NOT EXISTS app_records (
     collection VARCHAR(80) NOT NULL,
     record_id VARCHAR(255) NOT NULL,
@@ -47,17 +47,6 @@ CREATE TABLE IF NOT EXISTS app_records (
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     deleted_at TIMESTAMPTZ,
     PRIMARY KEY (collection, record_id)
-);
-
-CREATE TABLE IF NOT EXISTS app_sync_conflicts (
-    id BIGSERIAL PRIMARY KEY,
-    collection VARCHAR(80) NOT NULL,
-    record_id VARCHAR(255) NOT NULL,
-    existing_data JSONB NOT NULL,
-    incoming_data JSONB NOT NULL,
-    source_user_id INTEGER REFERENCES usuarios(id) ON DELETE SET NULL,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    resolved_at TIMESTAMPTZ
 );
 
 -- 3. TABELA DE CONFIGURAÇÕES GERAIS DA INSTITUIÇÃO
