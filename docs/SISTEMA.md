@@ -46,3 +46,5 @@ O schema contempla as seguintes tabelas principais:
 - `lideres` & `conselho_presbiterio`: Relacionamento com Membros para definir cargos.
 - `dizimos`, `ofertas` & `encargos`: Entidades financeiras da igreja.
 - `documentos` & `projetos`: Gestão documental e missões.
+
+O cadastro de membros é persistido na tabela `membros`. Na primeira inicialização após esta alteração, registos antigos de membros em `app_records` são migrados para essa tabela.

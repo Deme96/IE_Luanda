@@ -87,6 +87,7 @@ CREATE TABLE IF NOT EXISTS departamentos (
 -- 6. TABELA DE MEMBROS
 CREATE TABLE IF NOT EXISTS membros (
     id SERIAL PRIMARY KEY,
+    record_id VARCHAR(255),
     nome VARCHAR(255) NOT NULL,
     email VARCHAR(100),
     telefone VARCHAR(50),
@@ -95,9 +96,10 @@ CREATE TABLE IF NOT EXISTS membros (
     cidade VARCHAR(100) DEFAULT 'Luanda',
     departamento VARCHAR(100),
     estado_civil VARCHAR(50) CHECK (estado_civil IN ('solteiro', 'casado', 'divorciado', 'viuvo')),
-    status VARCHAR(50) DEFAULT 'ativo' CHECK (status IN ('ativo', 'inativo', 'afastado')),
+    status VARCHAR(50) DEFAULT 'ativo' CHECK (status IN ('ativo', 'inativo', 'afastado', 'disciplina')),
     data_batismo DATE,
     cargo VARCHAR(100),
+    pdf_document TEXT,
     igreja_filiada_id INT REFERENCES igrejas_filiadas(id) ON DELETE SET NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP

@@ -23,6 +23,7 @@ CREATE TABLE IF NOT EXISTS igrejas_filiadas (
 
 CREATE TABLE IF NOT EXISTS membros (
     id SERIAL PRIMARY KEY,
+    record_id VARCHAR(255),
     nome VARCHAR(255) NOT NULL,
     email VARCHAR(100),
     telefone VARCHAR(50),
@@ -30,7 +31,10 @@ CREATE TABLE IF NOT EXISTS membros (
     endereco TEXT,
     cidade VARCHAR(100),
     estado_civil VARCHAR(50) CHECK (estado_civil IN ('solteiro', 'casado', 'divorciado', 'viuvo')),
-    status VARCHAR(50) DEFAULT 'ativo' CHECK (status IN ('ativo', 'inativo', 'afastado')),
+    status VARCHAR(50) DEFAULT 'ativo' CHECK (status IN ('ativo', 'inativo', 'afastado', 'disciplina')),
+    departamento VARCHAR(100),
+    data_batismo DATE,
+    pdf_document TEXT,
     data_ingresso DATE,
     igreja_filiada_id INT REFERENCES igrejas_filiadas(id) ON DELETE SET NULL,
     batizado BOOLEAN DEFAULT false,

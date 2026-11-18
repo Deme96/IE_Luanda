@@ -53,6 +53,22 @@ const COLLECTIONS = {
   Noticias: { permission: 'configuracoes', read: 'configuracoes.noticias', create: 'configuracoes.noticias', update: 'configuracoes.noticias', delete: 'configuracoes.noticias' }
 };
 
+const MEMBER_FIELDS = [
+  'nome',
+  'email',
+  'telefone',
+  'data_nascimento',
+  'endereco',
+  'cidade',
+  'departamento',
+  'estado_civil',
+  'status',
+  'data_batismo',
+  'cargo',
+  'pdf_document'
+];
+const MEMBER_RETURNING = `record_id AS id, ${MEMBER_FIELDS.join(', ')}, created_at AS "createdAt", updated_at AS "updatedAt"`;
+
 const PUBLIC_COLLECTIONS = new Set([
   'Configuracoes',
   'Carousel',
@@ -194,6 +210,27 @@ function isObject(value) {
   return value !== null && typeof value === 'object' && !Array.isArray(value);
 }
 
+function nullableValue(value) {
+  return value === undefined || value === null || value === '' ? null : value;
+}
+
+function normalizeMember(data) {
+  return {
+    nome: String(data.nome || '').trim(),
+    email: nullableValue(data.email),
+    telefone: nullableValue(data.telefone),
+    data_nascimento: nullableValue(data.data_nascimento),
+    endereco: nullableValue(data.endereco),
+    cidade: nullableValue(data.cidade) || 'Luanda',
+    departamento: nullableValue(data.departamento),
+    estado_civil: nullableValue(data.estado_civil),
+    status: nullableValue(data.status) || 'ativo',
+    data_batismo: nullableValue(data.data_batismo),
+    cargo: nullableValue(data.cargo),
+    pdf_document: nullableValue(data.pdf_document)
+  };
+}
+
 function canonicalLoginEmails(email) {
   if (ADMIN_EMAILS.includes(email)) {
     return [email, ...ADMIN_EMAILS.filter((adminEmail) => adminEmail !== email)];
@@ -221,10 +258,9 @@ app.get('/api/membros', async (req, res, next) => {
   try {
     await requirePermission(req, 'membros.visualizar');
     const result = await db.query(
-      `SELECT data FROM app_records
-       WHERE collection = 'Membro' AND deleted_at IS NULL ORDER BY record_id`
+      `SELECT ${MEMBER_RETURNING} FROM membros ORDER BY id`
     );
-    res.json(result.rows.map((row) => row.data));
+    res.json(result.rows);
   } catch (error) {
     next(error);
   }
@@ -309,6 +345,12 @@ app.get('/api/collections/:collection', async (req, res, next) => {
     if (!PUBLIC_COLLECTIONS.has(collection)) {
       await requirePermission(req, definition.read);
     }
+    if (collection === 'Membro') {
+      const members = await db.query(
+        `SELECT ${MEMBER_RETURNING} FROM membros ORDER BY id`
+      );
+      return res.json(members.rows);
+    }
     const result = await db.query(
       'SELECT data FROM app_records WHERE collection = $1 AND deleted_at IS NULL ORDER BY record_id',
       [collection]
@@ -344,6 +386,19 @@ app.post('/api/collections/:collection', async (req, res, next) => {
     const definition = COLLECTIONS[collection];
     if (!definition) throw httpError(404, 'Coleção não encontrada.');
     await requirePermission(req, definition.create);
+    if (collection === 'Membro') {
+      const member = normalizeMember(req.body);
+      if (!member.nome) throw httpError(400, 'O nome do membro é obrigatório.');
+      const recordId = String(req.body.id || crypto.randomUUID());
+      const placeholders = MEMBER_FIELDS.map((_, index) => `$${index + 2}`).join(', ');
+      const result = await db.query(
+        `INSERT INTO membros (record_id, ${MEMBER_FIELDS.join(', ')})
+         VALUES ($1, ${placeholders})
+         RETURNING ${MEMBER_RETURNING}`,
+        [recordId, ...MEMBER_FIELDS.map((field) => member[field])]
+      );
+      return res.status(201).json(result.rows[0]);
+    }
     const id = String(req.body.id || crypto.randomUUID());
     const record = { ...req.body, id, createdAt: req.body.createdAt || new Date().toISOString() };
     const result = await db.query(
@@ -393,6 +448,20 @@ app.put('/api/collections/:collection/:id', async (req, res, next) => {
     const definition = COLLECTIONS[collection];
     if (!definition) throw httpError(404, 'Coleção não encontrada.');
     await requirePermission(req, definition.update);
+    if (collection === 'Membro') {
+      const member = normalizeMember(req.body);
+      if (!member.nome) throw httpError(400, 'O nome do membro é obrigatório.');
+      const assignments = MEMBER_FIELDS.map((field, index) => `${field} = $${index + 1}`);
+      const result = await db.query(
+        `UPDATE membros
+         SET ${assignments.join(', ')}, updated_at = NOW()
+         WHERE record_id = $${MEMBER_FIELDS.length + 1}
+         RETURNING ${MEMBER_RETURNING}`,
+        [...MEMBER_FIELDS.map((field) => member[field]), id]
+      );
+      if (!result.rows[0]) throw httpError(404, 'Membro não encontrado.');
+      return res.json(result.rows[0]);
+    }
     const patch = { ...req.body };
     delete patch.id;
     const result = await db.query(
@@ -413,6 +482,12 @@ app.put('/api/collections/:collection/:id', async (req, res, next) => {
 app.delete('/api/collections/:collection/:id', async (req, res, next) => {
   try {
     const { collection, id } = req.params;
+    if (collection === 'Membro') {
+      await requirePermission(req, COLLECTIONS.Membro.delete);
+      const result = await db.query('DELETE FROM membros WHERE record_id = $1', [id]);
+      if (!result.rowCount) throw httpError(404, 'Membro não encontrado.');
+      return res.json({ success: true });
+    }
     if (collection === 'users') {
       await requirePermission(req, 'configuracoes.usuarios');
       const user = await db.query('SELECT email FROM usuarios WHERE id = $1', [id]);
@@ -439,24 +514,43 @@ app.delete('/api/collections/:collection/:id', async (req, res, next) => {
 });
 
 app.post('/api/data/reset', async (req, res, next) => {
+  let client;
   try {
     await requirePermission(req, 'configuracoes.backup');
-    await db.query('UPDATE app_records SET deleted_at = NOW(), updated_at = NOW() WHERE deleted_at IS NULL');
+    client = await db.pool.connect();
+    await client.query('BEGIN');
+    await client.query('DELETE FROM membros');
+    await client.query('UPDATE app_records SET deleted_at = NOW(), updated_at = NOW() WHERE deleted_at IS NULL');
+    await client.query('COMMIT');
     res.json({ success: true });
   } catch (error) {
+    if (client) {
+      try {
+        await client.query('ROLLBACK');
+      } catch (rollbackError) {
+        console.error('Failed to roll back data reset:', rollbackError);
+      }
+    }
     next(error);
+  } finally {
+    if (client) client.release();
   }
 });
 
 app.get('/api/data/export', async (req, res, next) => {
   try {
     await requirePermission(req, 'configuracoes.backup');
-    const records = await db.query(
-      'SELECT collection, data FROM app_records WHERE deleted_at IS NULL ORDER BY collection, record_id'
-    );
+    const [records, members] = await Promise.all([
+      db.query(
+        `SELECT collection, data FROM app_records
+         WHERE collection <> 'Membro' AND deleted_at IS NULL ORDER BY collection, record_id`
+      ),
+      db.query(`SELECT ${MEMBER_RETURNING} FROM membros ORDER BY id`)
+    ]);
     const collections = Object.fromEntries(
       Object.keys(COLLECTIONS).map((collection) => [collection, []])
     );
+    collections.Membro = members.rows;
     for (const row of records.rows) {
       if (!collections[row.collection]) collections[row.collection] = [];
       collections[row.collection].push(row.data);
@@ -480,8 +574,17 @@ app.post('/api/data/import', async (req, res, next) => {
       throw httpError(400, 'O backup não contém coleções de dados reconhecidas.');
     }
     for (const [collection, records] of dataCollections) {
-      if (records.some((record) => !isObject(record) || record.id === undefined || record.id === null)) {
+      if (records.some((record) =>
+        !isObject(record)
+        || record.id === undefined
+        || record.id === null
+        || !String(record.id).trim()
+        || String(record.id).length > 255
+      )) {
         throw httpError(400, `A coleção "${collection}" contém um registo sem identificador válido.`);
+      }
+      if (collection === 'Membro' && records.some((record) => !String(record.nome || '').trim())) {
+        throw httpError(400, 'O backup contém um membro sem nome.');
       }
     }
 
@@ -496,6 +599,42 @@ app.post('/api/data/import', async (req, res, next) => {
       }
 
       const normalizedRecords = [...recordsById.values()];
+      if (collection === 'Membro') {
+        await client.query(
+          `INSERT INTO membros
+            (record_id, nome, email, telefone, data_nascimento, endereco, cidade,
+             departamento, estado_civil, status, data_batismo, cargo, pdf_document)
+           SELECT
+             member.id, member.nome, member.email, member.telefone,
+             NULLIF(member.data_nascimento, '')::date, member.endereco,
+             COALESCE(NULLIF(member.cidade, ''), 'Luanda'), member.departamento,
+             NULLIF(member.estado_civil, ''), COALESCE(NULLIF(member.status, ''), 'ativo'),
+             NULLIF(member.data_batismo, '')::date, member.cargo, member.pdf_document
+           FROM jsonb_to_recordset($1::jsonb) AS member(
+             id text, nome text, email text, telefone text, data_nascimento text,
+             endereco text, cidade text, departamento text, estado_civil text,
+             status text, data_batismo text, cargo text, pdf_document text
+           )
+           ON CONFLICT (record_id) DO UPDATE SET
+             nome = EXCLUDED.nome,
+             email = EXCLUDED.email,
+             telefone = EXCLUDED.telefone,
+             data_nascimento = EXCLUDED.data_nascimento,
+             endereco = EXCLUDED.endereco,
+             cidade = EXCLUDED.cidade,
+             departamento = EXCLUDED.departamento,
+             estado_civil = EXCLUDED.estado_civil,
+             status = EXCLUDED.status,
+             data_batismo = EXCLUDED.data_batismo,
+             cargo = EXCLUDED.cargo,
+             pdf_document = EXCLUDED.pdf_document,
+             updated_at = NOW()`,
+          [JSON.stringify(normalizedRecords)]
+        );
+        imported[collection] = normalizedRecords.length;
+        continue;
+      }
+
       await client.query(
         `INSERT INTO app_records (collection, record_id, data)
          SELECT $1, incoming.data->>'id', incoming.data
@@ -532,6 +671,53 @@ app.use((error, req, res, next) => {
   console.error('API request failed:', error);
   res.status(500).json({ error: 'Erro interno no servidor.' });
 });
+
+async function migrateLegacyMembers() {
+  const client = await db.pool.connect();
+  try {
+    await client.query('BEGIN');
+    const legacyMembers = await client.query(
+      `SELECT record_id, data FROM app_records
+       WHERE collection = 'Membro' AND deleted_at IS NULL ORDER BY record_id`
+    );
+    const placeholders = MEMBER_FIELDS.map((_, index) => `$${index + 2}`).join(', ');
+    let migratedCount = 0;
+
+    for (const row of legacyMembers.rows) {
+      const member = normalizeMember(row.data);
+      const recordId = String(row.data.id || row.record_id).trim();
+      if (!member.nome || !recordId || recordId.length > 255) {
+        console.error(`Skipping invalid legacy member record ${row.record_id}.`);
+        continue;
+      }
+
+      await client.query(
+        `INSERT INTO membros (record_id, ${MEMBER_FIELDS.join(', ')})
+         VALUES ($1, ${placeholders})
+         ON CONFLICT (record_id) DO NOTHING`,
+        [recordId, ...MEMBER_FIELDS.map((field) => member[field])]
+      );
+      await client.query(
+        `DELETE FROM app_records
+         WHERE collection = 'Membro' AND record_id = $1`,
+        [row.record_id]
+      );
+      migratedCount += 1;
+    }
+
+    await client.query('COMMIT');
+    if (migratedCount) console.log(`Migrated ${migratedCount} legacy member record(s) to membros.`);
+  } catch (error) {
+    try {
+      await client.query('ROLLBACK');
+    } catch (rollbackError) {
+      console.error('Failed to roll back legacy member migration:', rollbackError);
+    }
+    throw error;
+  } finally {
+    client.release();
+  }
+}
 
 async function start() {
   if (isProduction && !jwtSecret) {
@@ -571,6 +757,23 @@ async function start() {
     )
   `);
   await db.query('ALTER TABLE app_records ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMPTZ');
+  await db.query(`
+    ALTER TABLE membros
+      ADD COLUMN IF NOT EXISTS record_id VARCHAR(255),
+      ADD COLUMN IF NOT EXISTS departamento VARCHAR(100),
+      ADD COLUMN IF NOT EXISTS data_batismo DATE,
+      ADD COLUMN IF NOT EXISTS pdf_document TEXT
+  `);
+  await db.query('UPDATE membros SET record_id = id::text WHERE record_id IS NULL OR record_id = \'\'');
+  await db.query('CREATE UNIQUE INDEX IF NOT EXISTS membros_record_id_uidx ON membros (record_id)');
+  await db.query('UPDATE membros SET status = COALESCE(NULLIF(status, \'\'), \'ativo\')');
+  await db.query('ALTER TABLE membros DROP CONSTRAINT IF EXISTS membros_status_check');
+  await db.query(`
+    ALTER TABLE membros
+      ADD CONSTRAINT membros_status_check
+      CHECK (status IN ('ativo', 'inativo', 'afastado', 'disciplina'))
+  `);
+  await migrateLegacyMembers();
   app.listen(PORT, () => {
     console.log(`Backend server running on port ${PORT}`);
   });

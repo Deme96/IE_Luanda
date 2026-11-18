@@ -77,7 +77,7 @@ export default function EntityCrudPage({ title, entityName, columns, fields, det
       setIsDialogOpen(false);
       fetchData();
     } catch (e) {
-      toast.error("Erro ao salvar.");
+      toast.error(`Erro ao salvar: ${e.message || "verifique a conexão com a API."}`);
     }
   };
 
