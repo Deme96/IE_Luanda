@@ -7,6 +7,25 @@ CREATE TABLE IF NOT EXISTS usuarios (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+CREATE TABLE IF NOT EXISTS system_logs (
+    id BIGSERIAL PRIMARY KEY,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    actor_id VARCHAR(255),
+    actor_name VARCHAR(255),
+    actor_email VARCHAR(255),
+    actor_role VARCHAR(50),
+    action VARCHAR(80) NOT NULL,
+    entity VARCHAR(100),
+    record_id VARCHAR(255),
+    outcome VARCHAR(20) NOT NULL DEFAULT 'success'
+        CHECK (outcome IN ('success', 'failure')),
+    summary TEXT NOT NULL,
+    request_method VARCHAR(10),
+    request_path TEXT,
+    details JSONB NOT NULL DEFAULT '{}'::jsonb
+);
+CREATE INDEX IF NOT EXISTS system_logs_created_at_idx ON system_logs (created_at DESC, id DESC);
+
 CREATE TABLE IF NOT EXISTS igrejas_filiadas (
     id SERIAL PRIMARY KEY,
     nome VARCHAR(255) NOT NULL,

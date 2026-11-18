@@ -72,6 +72,12 @@ export const base44 = {
     }
   },
 
+  systemLogs: {
+    async list(limit = 250) {
+      return requestApi(`/api/system-logs?limit=${encodeURIComponent(limit)}`);
+    }
+  },
+
   db: {
     async export() {
       return requestApi("/api/data/export");

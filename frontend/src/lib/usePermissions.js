@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { base44 } from "@/base44";
 import { hasPermission } from "@/lib/permissions";
 
@@ -16,9 +16,11 @@ export function usePermissions() {
     return () => { mounted = false; };
   }, []);
 
+  const can = useCallback((permissionKey) => hasPermission(user, permissionKey), [user]);
+
   return {
     user,
     ready,
-    can: (permissionKey) => hasPermission(user, permissionKey)
+    can
   };
 }

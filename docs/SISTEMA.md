@@ -43,8 +43,11 @@ O schema contempla as seguintes tabelas principais:
 - `usuarios`: Autenticação.
 - `igrejas_filiadas`: Igrejas secundárias/filiais.
 - `membros`: Cadastro geral de membros.
+- `system_logs`: Registo de auditoria de autenticações, alterações e operações administrativas.
 - `lideres` & `conselho_presbiterio`: Relacionamento com Membros para definir cargos.
 - `dizimos`, `ofertas` & `encargos`: Entidades financeiras da igreja.
 - `documentos` & `projetos`: Gestão documental e missões.
 
 O cadastro de membros é persistido na tabela `membros`. Na primeira inicialização após esta alteração, registos antigos de membros em `app_records` são migrados para essa tabela.
+
+Os logs são consultados em **Configurações > Logs do Sistema**, com a permissão `configuracoes.logs`. O sistema regista ações e contexto técnico, sem gravar senhas nem o conteúdo dos registos pessoais. Os logs são preservados quando os dados operacionais são apagados ou restaurados; o ecrã apresenta até 250 eventos recentes.

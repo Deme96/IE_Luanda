@@ -202,8 +202,44 @@ async function authenticatedUser(req) {
 
 async function requirePermission(req, permission) {
   const user = await authenticatedUser(req);
+  req.auditActor = user;
   if (!hasPermission(user, permission)) throw httpError(403, 'Não tem permissão para esta operação.');
   return user;
+}
+
+async function writeSystemLog(req, {
+  actor = req.auditActor,
+  action,
+  entity = null,
+  recordId = null,
+  summary,
+  outcome = 'success',
+  details = {}
+}) {
+  try {
+    await db.query(
+      `INSERT INTO system_logs
+        (actor_id, actor_name, actor_email, actor_role, action, entity, record_id,
+         outcome, summary, request_method, request_path, details)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12::jsonb)`,
+      [
+        actor?.id == null ? null : String(actor.id),
+        actor?.nome || null,
+        actor?.email || null,
+        actor?.role || null,
+        action,
+        entity,
+        recordId == null ? null : String(recordId),
+        outcome,
+        summary,
+        req.method,
+        req.originalUrl,
+        JSON.stringify(details)
+      ]
+    );
+  } catch (error) {
+    console.error('Failed to write system audit log:', error);
+  }
 }
 
 function isObject(value) {
@@ -254,6 +290,27 @@ app.get('/api/health', async (req, res, next) => {
   }
 });
 
+app.get('/api/system-logs', async (req, res, next) => {
+  try {
+    await requirePermission(req, 'configuracoes.logs');
+    const requestedLimit = Number.parseInt(req.query.limit, 10);
+    const limit = Number.isInteger(requestedLimit)
+      ? Math.min(Math.max(requestedLimit, 1), 250)
+      : 250;
+    const result = await db.query(
+      `SELECT id, created_at, actor_name, actor_email, actor_role, action,
+              entity, record_id, outcome, summary, request_method, request_path, details
+       FROM system_logs
+       ORDER BY created_at DESC, id DESC
+       LIMIT $1`,
+      [limit]
+    );
+    res.json(result.rows);
+  } catch (error) {
+    next(error);
+  }
+});
+
 app.get('/api/membros', async (req, res, next) => {
   try {
     await requirePermission(req, 'membros.visualizar');
@@ -267,8 +324,9 @@ app.get('/api/membros', async (req, res, next) => {
 });
 
 app.post('/api/auth/login', async (req, res, next) => {
+  let email = '';
   try {
-    const email = normalizeEmail(req.body?.email);
+    email = normalizeEmail(req.body?.email);
     const password = String(req.body?.password || '');
     if (!email || !password) throw httpError(400, 'E-mail e senha são obrigatórios.');
 
@@ -293,8 +351,24 @@ app.post('/api/auth/login', async (req, res, next) => {
       ]);
     }
 
+    await writeSystemLog(req, {
+      actor: user,
+      action: 'login',
+      entity: 'users',
+      recordId: user.id,
+      summary: 'Sessão iniciada'
+    });
     res.json({ token: createToken(user.id), user: publicUser(user) });
   } catch (error) {
+    if (error.status === 401 && email) {
+      await writeSystemLog(req, {
+        actor: { email },
+        action: 'login_failed',
+        entity: 'users',
+        summary: 'Tentativa de início de sessão sem sucesso',
+        outcome: 'failure'
+      });
+    }
     next(error);
   }
 });
@@ -313,6 +387,13 @@ app.post('/api/auth/register', async (req, res, next) => {
        RETURNING id, nome, email, cargo, role, status, permissoes`,
       [nome, email, hashPassword(password)]
     );
+    await writeSystemLog(req, {
+      actor: result.rows[0],
+      action: 'user_registered',
+      entity: 'users',
+      recordId: result.rows[0].id,
+      summary: 'Conta criada por registo'
+    });
     res.status(201).json({ user: publicUser(result.rows[0]) });
   } catch (error) {
     if (error.code === '23505') return next(httpError(409, 'Já existe uma conta com este e-mail.'));
@@ -380,6 +461,12 @@ app.post('/api/collections/:collection', async (req, res, next) => {
          RETURNING id, nome, email, cargo, role, status, permissoes`,
         [nome, email, hashPassword(password), req.body.cargo || null, req.body.role || 'personalizado', req.body.status || 'ativo', JSON.stringify(req.body.permissoes || ['dashboard'])]
       );
+      await writeSystemLog(req, {
+        action: 'create',
+        entity: 'users',
+        recordId: result.rows[0].id,
+        summary: 'Utilizador criado'
+      });
       return res.status(201).json(publicUser(result.rows[0]));
     }
 
@@ -397,6 +484,12 @@ app.post('/api/collections/:collection', async (req, res, next) => {
          RETURNING ${MEMBER_RETURNING}`,
         [recordId, ...MEMBER_FIELDS.map((field) => member[field])]
       );
+      await writeSystemLog(req, {
+        action: 'create',
+        entity: collection,
+        recordId,
+        summary: 'Membro criado'
+      });
       return res.status(201).json(result.rows[0]);
     }
     const id = String(req.body.id || crypto.randomUUID());
@@ -405,6 +498,12 @@ app.post('/api/collections/:collection', async (req, res, next) => {
       'INSERT INTO app_records (collection, record_id, data) VALUES ($1, $2, $3::jsonb) RETURNING data',
       [collection, id, JSON.stringify(record)]
     );
+    await writeSystemLog(req, {
+      action: 'create',
+      entity: collection,
+      recordId: id,
+      summary: 'Registo criado'
+    });
     res.status(201).json(result.rows[0].data);
   } catch (error) {
     if (error.code === '23505') return next(httpError(409, 'Já existe um registro com este identificador.'));
@@ -442,6 +541,12 @@ app.put('/api/collections/:collection/:id', async (req, res, next) => {
         values
       );
       if (!result.rows[0]) throw httpError(404, 'Usuário não encontrado.');
+      await writeSystemLog(req, {
+        action: 'update',
+        entity: 'users',
+        recordId: id,
+        summary: 'Utilizador atualizado'
+      });
       return res.json(publicUser(result.rows[0]));
     }
 
@@ -460,6 +565,12 @@ app.put('/api/collections/:collection/:id', async (req, res, next) => {
         [...MEMBER_FIELDS.map((field) => member[field]), id]
       );
       if (!result.rows[0]) throw httpError(404, 'Membro não encontrado.');
+      await writeSystemLog(req, {
+        action: 'update',
+        entity: collection,
+        recordId: id,
+        summary: 'Membro atualizado'
+      });
       return res.json(result.rows[0]);
     }
     const patch = { ...req.body };
@@ -473,6 +584,12 @@ app.put('/api/collections/:collection/:id', async (req, res, next) => {
       [collection, id, JSON.stringify(patch)]
     );
     if (!result.rows[0]) throw httpError(404, 'Registro não encontrado.');
+    await writeSystemLog(req, {
+      action: 'update',
+      entity: collection,
+      recordId: id,
+      summary: 'Registo atualizado'
+    });
     res.json(result.rows[0].data);
   } catch (error) {
     next(error);
@@ -486,6 +603,12 @@ app.delete('/api/collections/:collection/:id', async (req, res, next) => {
       await requirePermission(req, COLLECTIONS.Membro.delete);
       const result = await db.query('DELETE FROM membros WHERE record_id = $1', [id]);
       if (!result.rowCount) throw httpError(404, 'Membro não encontrado.');
+      await writeSystemLog(req, {
+        action: 'delete',
+        entity: collection,
+        recordId: id,
+        summary: 'Membro excluído'
+      });
       return res.json({ success: true });
     }
     if (collection === 'users') {
@@ -496,6 +619,12 @@ app.delete('/api/collections/:collection/:id', async (req, res, next) => {
         throw httpError(400, 'Não é permitido excluir a conta administradora principal.');
       }
       await db.query('DELETE FROM usuarios WHERE id = $1', [id]);
+      await writeSystemLog(req, {
+        action: 'delete',
+        entity: 'users',
+        recordId: id,
+        summary: 'Utilizador excluído'
+      });
       return res.json({ success: true });
     }
 
@@ -507,6 +636,12 @@ app.delete('/api/collections/:collection/:id', async (req, res, next) => {
       [collection, id]
     );
     if (!result.rowCount) throw httpError(404, 'Registro não encontrado.');
+    await writeSystemLog(req, {
+      action: 'delete',
+      entity: collection,
+      recordId: id,
+      summary: 'Registo excluído'
+    });
     res.json({ success: true });
   } catch (error) {
     next(error);
@@ -522,6 +657,11 @@ app.post('/api/data/reset', async (req, res, next) => {
     await client.query('DELETE FROM membros');
     await client.query('UPDATE app_records SET deleted_at = NOW(), updated_at = NOW() WHERE deleted_at IS NULL');
     await client.query('COMMIT');
+    await writeSystemLog(req, {
+      action: 'data_reset',
+      entity: 'system',
+      summary: 'Dados operacionais eliminados'
+    });
     res.json({ success: true });
   } catch (error) {
     if (client) {
@@ -555,6 +695,16 @@ app.get('/api/data/export', async (req, res, next) => {
       if (!collections[row.collection]) collections[row.collection] = [];
       collections[row.collection].push(row.data);
     }
+    await writeSystemLog(req, {
+      action: 'backup_export',
+      entity: 'system',
+      summary: 'Backup exportado',
+      details: {
+        collections: Object.fromEntries(
+          Object.entries(collections).map(([name, items]) => [name, items.length])
+        )
+      }
+    });
     res.json(collections);
   } catch (error) {
     next(error);
@@ -647,6 +797,12 @@ app.post('/api/data/import', async (req, res, next) => {
     }
 
     await client.query('COMMIT');
+    await writeSystemLog(req, {
+      action: 'backup_import',
+      entity: 'system',
+      summary: 'Backup restaurado',
+      details: { imported }
+    });
     res.json({ imported });
   } catch (error) {
     if (client) {
@@ -664,6 +820,25 @@ app.post('/api/data/import', async (req, res, next) => {
 
 app.use((error, req, res, next) => {
   if (res.headersSent) return next(error);
+  const status = error.status || 500;
+  if (
+    status >= 500
+    || status === 401
+    || status === 403
+    || ['POST', 'PUT', 'PATCH', 'DELETE'].includes(req.method)
+  ) {
+    const isLoginFailure = req.path === '/api/auth/login' && status < 500;
+    const isAuditReadFailure = req.path === '/api/system-logs';
+    if (!isLoginFailure && !isAuditReadFailure) {
+      void writeSystemLog(req, {
+        action: status >= 500 ? 'api_error' : 'request_failed',
+        entity: req.params?.collection || 'system',
+        summary: `Operação não concluída (${req.method} ${req.path})`,
+        outcome: 'failure',
+        details: { status }
+      });
+    }
+  }
   if (error.status && error.status < 500) {
     res.status(error.status).json({ error: error.message });
     return;
@@ -756,6 +931,28 @@ async function start() {
       PRIMARY KEY (collection, record_id)
     )
   `);
+  await db.query(`
+    CREATE TABLE IF NOT EXISTS system_logs (
+      id BIGSERIAL PRIMARY KEY,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      actor_id VARCHAR(255),
+      actor_name VARCHAR(255),
+      actor_email VARCHAR(255),
+      actor_role VARCHAR(50),
+      action VARCHAR(80) NOT NULL,
+      entity VARCHAR(100),
+      record_id VARCHAR(255),
+      outcome VARCHAR(20) NOT NULL DEFAULT 'success'
+        CHECK (outcome IN ('success', 'failure')),
+      summary TEXT NOT NULL,
+      request_method VARCHAR(10),
+      request_path TEXT,
+      details JSONB NOT NULL DEFAULT '{}'::jsonb
+    )
+  `);
+  await db.query(
+    'CREATE INDEX IF NOT EXISTS system_logs_created_at_idx ON system_logs (created_at DESC, id DESC)'
+  );
   await db.query('ALTER TABLE app_records ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMPTZ');
   await db.query(`
     ALTER TABLE membros

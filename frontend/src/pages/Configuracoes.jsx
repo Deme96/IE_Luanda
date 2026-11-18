@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useRef } from "react";
+import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { base44 } from "@/base44";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -12,7 +12,7 @@ import {
   Settings, ShieldCheck, Users, Calendar, Newspaper, FolderOpen,
   Images, Plus, Trash2, Edit, Check, Shield, Upload, Eye,
   RefreshCw, Download, Key, Image as ImageIcon, ExternalLink,
-  CheckSquare, Square, Search, ChevronDown, ChevronUp, Video
+  CheckSquare, Square, Search, ChevronDown, ChevronUp, Video, Activity
 } from "lucide-react";
 import { getVideoSource } from "@/lib/video";
 import { usePermissions } from "@/lib/usePermissions";
@@ -48,6 +48,10 @@ export default function Configuracoes() {
   const [isRestoringBackup, setIsRestoringBackup] = useState(false);
   const [activeTab, setActiveTab] = useState("sistema");
   const [loading, setLoading] = useState(false);
+  const [systemLogs, setSystemLogs] = useState([]);
+  const [systemLogsLoading, setSystemLogsLoading] = useState(false);
+  const [systemLogsSearch, setSystemLogsSearch] = useState("");
+  const [systemLogsOutcome, setSystemLogsOutcome] = useState("all");
 
   // Dados de Sistema
   const [config, setConfig] = useState({
@@ -123,16 +127,12 @@ export default function Configuracoes() {
   const [editingNoticia, setEditingNoticia] = useState(null);
   const [noticiaForm, setNoticiaForm] = useState({ titulo: "", data: "", descricao: "" });
 
-  useEffect(() => {
-    loadAllData();
-  }, []);
-
-  const loadAllData = async () => {
+  const loadAllData = useCallback(async () => {
     setLoading(true);
     try {
       const [c, u, car, videoItems, cult, proj, not] = await Promise.all([
-        base44.db.get("Configuracoes"),
-        base44.db.get("users"),
+        can("configuracoes.sistema") ? base44.db.get("Configuracoes") : Promise.resolve([]),
+        can("configuracoes.usuarios") ? base44.db.get("users") : Promise.resolve([]),
         base44.db.get("Carousel"),
         base44.db.get("Videos"),
         base44.db.get("Cultos"),
@@ -152,7 +152,27 @@ export default function Configuracoes() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [can]);
+
+  useEffect(() => {
+    if (permissionsReady) loadAllData();
+  }, [permissionsReady, loadAllData]);
+
+  const loadSystemLogs = useCallback(async () => {
+    setSystemLogsLoading(true);
+    try {
+      const logs = await base44.systemLogs.list(250);
+      setSystemLogs(logs);
+    } catch (error) {
+      toast.error("Não foi possível carregar os logs: " + error.message);
+    } finally {
+      setSystemLogsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (activeTab === "logs") loadSystemLogs();
+  }, [activeTab, loadSystemLogs]);
 
   // ═══════════════════════════════════════════════════════════════
   // SISTEMA & POLÍTICA
@@ -773,6 +793,24 @@ export default function Configuracoes() {
     }
   };
 
+  const filteredSystemLogs = useMemo(() => {
+    const query = systemLogsSearch.trim().toLowerCase();
+    return systemLogs.filter((log) => {
+      if (systemLogsOutcome !== "all" && log.outcome !== systemLogsOutcome) return false;
+      if (!query) return true;
+      return [
+        log.actor_name,
+        log.actor_email,
+        log.action,
+        log.entity,
+        log.record_id,
+        log.summary,
+        log.request_method,
+        log.request_path
+      ].some((value) => String(value || "").toLowerCase().includes(query));
+    });
+  }, [systemLogs, systemLogsOutcome, systemLogsSearch]);
+
   const tabs = [
     { id: "sistema", label: "Sistema", icon: Settings, permission: "configuracoes.sistema" },
     { id: "carrossel", label: "Carrossel & Galeria", icon: Images, permission: "configuracoes.carrossel" },
@@ -782,6 +820,7 @@ export default function Configuracoes() {
     { id: "projetos", label: "Projetos", icon: FolderOpen, permission: "configuracoes.projetos" },
     { id: "noticias", label: "Notícias", icon: Newspaper, permission: "configuracoes.noticias" },
     { id: "politica", label: "Política de Uso", icon: ShieldCheck, permission: "configuracoes.politica" },
+    { id: "logs", label: "Logs do Sistema", icon: Activity, permission: "configuracoes.logs" },
     { id: "backup", label: "Backup & Dados", icon: RefreshCw, permission: "configuracoes.backup" },
   ];
   const visibleTabs = permissionsReady ? tabs.filter(tab => can(tab.permission)) : [];
@@ -834,6 +873,144 @@ export default function Configuracoes() {
         <div className="flex-1 min-w-0">
           <Card className="border border-gray-200 shadow-sm rounded-2xl bg-white overflow-hidden">
             
+            {activeTab === "logs" && (
+              <div>
+                <CardHeader className="border-b bg-gray-50/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <div>
+                    <CardTitle className="flex items-center gap-2">
+                      <Activity className="text-military h-5 w-5" /> Logs detalhados do sistema
+                    </CardTitle>
+                    <CardDescription>
+                      Histórico de autenticações, alterações, utilizadores e operações de backup. Os dados pessoais dos registos e as senhas não são guardados no log.
+                    </CardDescription>
+                  </div>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={loadSystemLogs}
+                    disabled={systemLogsLoading}
+                    className="gap-2 shrink-0"
+                  >
+                    <RefreshCw size={16} className={systemLogsLoading ? "animate-spin" : ""} />
+                    Atualizar
+                  </Button>
+                </CardHeader>
+                <CardContent className="pt-6 space-y-5">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div className="rounded-xl border bg-gray-50 p-4">
+                      <p className="text-xs text-gray-500">Registos carregados</p>
+                      <p className="text-2xl font-bold text-gray-900">{systemLogs.length}</p>
+                    </div>
+                    <div className="rounded-xl border border-emerald-100 bg-emerald-50 p-4">
+                      <p className="text-xs text-emerald-700">Operações concluídas</p>
+                      <p className="text-2xl font-bold text-emerald-900">
+                        {systemLogs.filter((log) => log.outcome === "success").length}
+                      </p>
+                    </div>
+                    <div className="rounded-xl border border-red-100 bg-red-50 p-4">
+                      <p className="text-xs text-red-700">Falhas registadas</p>
+                      <p className="text-2xl font-bold text-red-900">
+                        {systemLogs.filter((log) => log.outcome === "failure").length}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col sm:flex-row gap-3">
+                    <div className="flex-1">
+                      <Input
+                        value={systemLogsSearch}
+                        onChange={(event) => setSystemLogsSearch(event.target.value)}
+                        placeholder="Pesquisar utilizador, ação, entidade ou identificador..."
+                        aria-label="Pesquisar logs do sistema"
+                      />
+                    </div>
+                    <Select value={systemLogsOutcome} onValueChange={setSystemLogsOutcome}>
+                      <SelectTrigger className="w-full sm:w-48">
+                        <SelectValue placeholder="Todos os resultados" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">Todos os resultados</SelectItem>
+                        <SelectItem value="success">Concluídas</SelectItem>
+                        <SelectItem value="failure">Falhas</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {systemLogsLoading && systemLogs.length === 0 ? (
+                    <div className="py-12 text-center text-sm text-gray-500">A carregar logs...</div>
+                  ) : filteredSystemLogs.length === 0 ? (
+                    <div className="rounded-xl border border-dashed py-12 text-center text-sm text-gray-500">
+                      {systemLogs.length
+                        ? "Nenhum log corresponde aos filtros selecionados."
+                        : "Ainda não há atividades registadas. As novas ações aparecerão aqui."}
+                    </div>
+                  ) : (
+                    <div className="overflow-x-auto rounded-xl border">
+                      <table className="w-full min-w-[900px] text-sm">
+                        <thead className="bg-gray-50 text-left text-xs uppercase text-gray-500">
+                          <tr>
+                            <th className="px-4 py-3">Data e hora</th>
+                            <th className="px-4 py-3">Utilizador</th>
+                            <th className="px-4 py-3">Atividade</th>
+                            <th className="px-4 py-3">Alvo / origem</th>
+                            <th className="px-4 py-3">Resultado</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-gray-100">
+                          {filteredSystemLogs.map((log) => (
+                            <tr key={log.id} className="align-top hover:bg-gray-50/70">
+                              <td className="whitespace-nowrap px-4 py-3 text-gray-600">
+                                {new Date(log.created_at).toLocaleString(i18n.language || "pt-PT")}
+                              </td>
+                              <td className="px-4 py-3">
+                                <div className="font-medium text-gray-900">{log.actor_name || log.actor_email || "Sistema"}</div>
+                                {log.actor_name && log.actor_email && (
+                                  <div className="text-xs text-gray-500">{log.actor_email}</div>
+                                )}
+                                {log.actor_role && <div className="text-xs text-gray-500">{log.actor_role}</div>}
+                              </td>
+                              <td className="max-w-sm px-4 py-3">
+                                <div className="font-medium text-gray-900">{log.summary}</div>
+                                <div className="text-xs text-gray-500">{log.action}</div>
+                                {log.details && Object.keys(log.details).length > 0 && (
+                                  <details className="mt-1 text-xs text-gray-600">
+                                    <summary className="cursor-pointer">Detalhes adicionais</summary>
+                                    <pre className="mt-1 whitespace-pre-wrap break-all rounded bg-gray-50 p-2">
+                                      {JSON.stringify(log.details, null, 2)}
+                                    </pre>
+                                  </details>
+                                )}
+                              </td>
+                              <td className="px-4 py-3 text-gray-700">
+                                <div>{log.entity || "—"}{log.record_id ? ` · ${log.record_id}` : ""}</div>
+                                <div className="max-w-xs break-all text-xs text-gray-500">
+                                  {log.request_method} {log.request_path}
+                                </div>
+                              </td>
+                              <td className="px-4 py-3">
+                                <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${
+                                  log.outcome === "success"
+                                    ? "bg-emerald-100 text-emerald-800"
+                                    : "bg-red-100 text-red-800"
+                                }`}>
+                                  {log.outcome === "success" ? "Concluída" : "Falha"}
+                                </span>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                  {systemLogs.length === 250 && (
+                    <p className="text-xs text-gray-500">
+                      A mostrar as 250 atividades mais recentes. Pesquise ou filtre os resultados carregados.
+                    </p>
+                  )}
+                </CardContent>
+              </div>
+            )}
+
             {/* ═════════════════════════════════════════════════════════════ */}
             {/* ABA 1: SISTEMA */}
             {/* ═════════════════════════════════════════════════════════════ */}
