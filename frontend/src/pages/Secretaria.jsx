@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
+import { DocumentPreviewContent } from "@/components/DocumentPreviewDialog";
 import {
   Bell, AlertTriangle, Calendar, Clock, MapPin, Users, FileText,
   Download, Eye, Plus, Search, Filter, CheckCircle, ExternalLink,
@@ -803,30 +804,8 @@ export default function Secretaria() {
 
           {/* Conteúdo do Documento */}
           <div className="flex-1 overflow-y-auto py-4 space-y-4">
-            {previewFileUrl && String(previewFileUrl).startsWith("data:application/pdf") ? (
-              <div className="space-y-3">
-                <iframe
-                  src={previewFileUrl}
-                  title="Documento PDF"
-                  className="w-full h-[480px] rounded-2xl border border-gray-200 bg-gray-50 shadow-inner"
-                />
-              </div>
-            ) : previewFileUrl && (String(previewFileUrl).endsWith(".pdf") || String(previewFileUrl).includes("pdf")) ? (
-              <div className="space-y-3">
-                <iframe
-                  src={previewFileUrl}
-                  title="Documento PDF"
-                  className="w-full h-[480px] rounded-2xl border border-gray-200 bg-gray-50 shadow-inner"
-                />
-              </div>
-            ) : previewFileUrl && (String(previewFileUrl).startsWith("data:image/") || String(previewFileUrl).startsWith("http")) ? (
-              <div className="p-4 bg-gray-50 rounded-2xl border flex items-center justify-center">
-                <img
-                  src={previewFileUrl}
-                  alt={previewDoc.titulo}
-                  className="max-h-[460px] rounded-xl object-contain shadow-sm"
-                />
-              </div>
+            {previewFileUrl ? (
+              <DocumentPreviewContent fileUrl={previewFileUrl} title={previewDoc?.titulo} />
             ) : (
               /* Folha Timbrada Oficial da Igreja */
               <div className="bg-amber-50/20 border-2 border-dashed border-gray-200 rounded-2xl p-8 space-y-6 text-gray-800 font-serif shadow-inner">

@@ -205,6 +205,7 @@ export default function EntityCrudPage({ title, entityName, columns, fields, det
                   <Input
                     id={field.name}
                     type="file"
+                    accept={field.accept}
                     onChange={(e) => {
                       const file = e.target.files[0];
                       if (file) {

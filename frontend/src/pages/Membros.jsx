@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/base44";
 import EntityCrudPage from "@/components/EntityCrudPage";
+import { DocumentPreviewButton } from "@/components/DocumentPreviewDialog";
 
 export default function Membros() {
   const [departamentos, setDepartamentos] = useState([]);
@@ -31,13 +32,15 @@ export default function Membros() {
     {
       key: "pdf_document",
       label: "Documento",
-      render: (val) => {
+      render: (val, row) => {
         if (!val) return "—";
-        const isDataPdf = String(val).startsWith("data:application/pdf");
         return (
-          <a href={val} target="_blank" rel="noreferrer" className="text-blue-600 underline text-sm" {...(isDataPdf ? { download: "documento_membro.pdf" } : {})}>
-            Ver PDF
-          </a>
+          <DocumentPreviewButton
+            fileUrl={val}
+            title={`Documento de ${row.nome || "membro"}`}
+            fileName="documento_membro.pdf"
+            className="text-blue-700"
+          />
         );
       },
     },
@@ -81,7 +84,7 @@ export default function Membros() {
       ],
     },
     { name: "cargo", label: "Cargo (opcional)" },
-    { name: "pdf_document", label: "Documento do Membro (PDF)", type: "file", className: "sm:col-span-2" },
+    { name: "pdf_document", label: "Documento do Membro (PDF)", type: "file", accept: "application/pdf", className: "sm:col-span-2" },
   ];
 
   const renderMemberDetails = (member, { can }) => (
@@ -100,21 +103,11 @@ export default function Membros() {
         <strong>Documento:</strong>
         {member.pdf_document ? (
           <div className="mt-2">
-            {String(member.pdf_document).startsWith("data:application/pdf") ? (
-              <>
-                <a href={member.pdf_document} target="_blank" rel="noreferrer" className="text-blue-600 underline text-sm" download="documento_membro.pdf">Download PDF</a>
-                <div className="mt-3">
-                  <iframe src={member.pdf_document} title="Preview PDF" className="w-full" style={{ height: 420, border: '1px solid #e5e7eb', borderRadius: 8 }} />
-                </div>
-              </>
-            ) : (
-              <>
-                <a href={member.pdf_document} target="_blank" rel="noreferrer" className="text-blue-600 underline text-sm">Abrir PDF</a>
-                <div className="mt-3">
-                  <iframe src={member.pdf_document} title="Preview PDF" className="w-full" style={{ height: 420, border: '1px solid #e5e7eb', borderRadius: 8 }} />
-                </div>
-              </>
-            )}
+            <DocumentPreviewButton
+              fileUrl={member.pdf_document}
+              title={`Documento de ${member.nome || "membro"}`}
+              fileName="documento_membro.pdf"
+            />
           </div>
         ) : (
           <div>Sem documento anexado.</div>
