@@ -1,8 +1,13 @@
 const VIDEO_EXTENSIONS = /\.(mp4|webm|ogg|mov|m4v)$/i;
 
 export function getVideoSource(value) {
+  const rawValue = String(value || "").trim();
+  if (/^data:video\/(?:mp4|webm|ogg)(?:;[^,]*)?,/i.test(rawValue)) {
+    return { type: "file", src: rawValue };
+  }
+
   try {
-    const url = new URL(String(value || "").trim());
+    const url = new URL(rawValue);
     if (url.protocol !== "https:" && url.protocol !== "http:") return null;
 
     const host = url.hostname.toLowerCase();

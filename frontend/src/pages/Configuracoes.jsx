@@ -102,6 +102,7 @@ export default function Configuracoes() {
   const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
   const [editingVideo, setEditingVideo] = useState(null);
   const [videoForm, setVideoForm] = useState({ titulo: "", descricao: "", url: "", ordem: 1, ativo: true });
+  const [isProcessingVideo, setIsProcessingVideo] = useState(false);
 
   // Modal de Culto
   const [isCultoModalOpen, setIsCultoModalOpen] = useState(false);
@@ -502,6 +503,39 @@ export default function Configuracoes() {
       ativo: true
     });
     setIsVideoModalOpen(true);
+  };
+
+  const handleVideoFileUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    e.target.value = "";
+
+    const acceptedTypes = ["video/mp4", "video/webm", "video/ogg"];
+    const acceptedExtension = /\.(mp4|webm|ogv|ogg)$/i.test(file.name);
+    if (!acceptedTypes.includes(file.type) && !acceptedExtension) {
+      toast.error("Formato não suportado. Selecione um vídeo MP4, WebM ou OGG.");
+      return;
+    }
+    if (file.size > 25 * 1024 * 1024) {
+      toast.error("O vídeo deve ter no máximo 25 MB.");
+      return;
+    }
+
+    setIsProcessingVideo(true);
+    try {
+      const dataUrl = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = () => reject(new Error("Não foi possível ler o vídeo selecionado."));
+        reader.readAsDataURL(file);
+      });
+      setVideoForm(prev => ({ ...prev, url: dataUrl }));
+      toast.success("Vídeo carregado a partir do computador.");
+    } catch (error) {
+      toast.error(error.message || "Não foi possível carregar o vídeo.");
+    } finally {
+      setIsProcessingVideo(false);
+    }
   };
 
   const handleSaveVideo = async (e) => {
@@ -1190,7 +1224,7 @@ export default function Configuracoes() {
                     <CardTitle className="flex items-center gap-2">
                       <Video className="text-military h-5 w-5" /> Vídeos do Site
                     </CardTitle>
-                    <CardDescription>Publique vídeos do YouTube, Vimeo ou arquivos MP4, WebM e OGG usando o link do vídeo.</CardDescription>
+                    <CardDescription>Publique vídeos do YouTube, Vimeo ou carregue um arquivo MP4, WebM ou OGG a partir do computador.</CardDescription>
                   </div>
                   <Button onClick={() => handleOpenVideoModal()} className="bg-military hover:bg-military-dark gap-2">
                     <Plus size={16} /> Adicionar Vídeo
@@ -1217,9 +1251,15 @@ export default function Configuracoes() {
                               </div>
                               <h4 className="font-bold text-gray-900">{video.titulo || "Vídeo sem título"}</h4>
                               <p className="text-xs text-gray-600 mt-1 line-clamp-2">{video.descricao || "Sem descrição"}</p>
-                              <a href={video.url} target="_blank" rel="noreferrer" className="mt-2 inline-flex max-w-full items-center gap-1 text-xs text-blue-700 hover:underline">
-                                <ExternalLink size={12} /> <span className="truncate">Abrir vídeo</span>
-                              </a>
+                              {video.url?.startsWith("data:video/") ? (
+                                <span className="mt-2 inline-flex max-w-full items-center gap-1 text-xs text-green-700">
+                                  <Video size={12} /> <span className="truncate">Vídeo carregado do computador</span>
+                                </span>
+                              ) : (
+                                <a href={video.url} target="_blank" rel="noreferrer" className="mt-2 inline-flex max-w-full items-center gap-1 text-xs text-blue-700 hover:underline">
+                                  <ExternalLink size={12} /> <span className="truncate">Abrir vídeo</span>
+                                </a>
+                              )}
                             </div>
                             <span className={`shrink-0 text-[11px] font-bold px-2 py-0.5 rounded-full ${video.ativo !== false ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-500"}`}>
                               {video.ativo !== false ? "Publicado" : "Oculto"}
@@ -2029,20 +2069,36 @@ export default function Configuracoes() {
               <Video className="text-military h-5 w-5" />
               {editingVideo ? "Editar Vídeo" : "Adicionar Vídeo ao Site"}
             </DialogTitle>
-            <DialogDescription>Insira o link de um vídeo do YouTube, Vimeo ou de um arquivo MP4, WebM ou OGG hospedado online.</DialogDescription>
+            <DialogDescription>Selecione um vídeo do computador ou insira o link do YouTube ou Vimeo.</DialogDescription>
           </DialogHeader>
           <form onSubmit={handleSaveVideo} className="space-y-4 pt-3">
+            <div className="space-y-1.5">
+              <Label>Vídeo do Computador</Label>
+              <label className="flex cursor-pointer items-center justify-center gap-2 rounded-xl border-2 border-dashed border-gray-300 px-4 py-5 text-sm font-semibold text-gray-600 hover:border-military hover:bg-green-50">
+                <Upload size={18} />
+                {isProcessingVideo ? "Lendo vídeo..." : "Selecionar arquivo MP4, WebM ou OGG"}
+                <input
+                  type="file"
+                  accept="video/mp4,video/webm,video/ogg,.mp4,.webm,.ogv,.ogg"
+                  onChange={handleVideoFileUpload}
+                  className="hidden"
+                  disabled={isProcessingVideo}
+                />
+              </label>
+              {videoForm.url?.startsWith("data:video/") && (
+                <p className="text-xs text-green-700">Vídeo local selecionado. Máximo: 25 MB.</p>
+              )}
+            </div>
             <div className="space-y-1.5">
               <Label htmlFor="video_url">Link do Vídeo *</Label>
               <Input
                 id="video_url"
                 type="url"
                 placeholder="https://www.youtube.com/watch?v=..."
-                value={videoForm.url}
+                value={videoForm.url?.startsWith("data:video/") ? "" : videoForm.url}
                 onChange={(e) => setVideoForm({ ...videoForm, url: e.target.value })}
-                required
               />
-              <p className="text-xs text-gray-500">Aceita links do YouTube, Vimeo e arquivos .mp4, .webm ou .ogg.</p>
+              <p className="text-xs text-gray-500">Ou cole um link do YouTube ou Vimeo.</p>
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="video_titulo">Título</Label>
@@ -2077,7 +2133,7 @@ export default function Configuracoes() {
             </div>
             <div className="flex justify-end gap-2 pt-3 border-t">
               <Button type="button" variant="outline" onClick={() => setIsVideoModalOpen(false)}>Cancelar</Button>
-              <Button type="submit" className="bg-military hover:bg-military-dark">Salvar Vídeo</Button>
+              <Button type="submit" disabled={isProcessingVideo} className="bg-military hover:bg-military-dark">Salvar Vídeo</Button>
             </div>
           </form>
         </DialogContent>
